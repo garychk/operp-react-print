@@ -1,0 +1,72 @@
+/* ===== 全局样式 ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ===== 主容器 ===== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== 主体布局 ===== */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== 左侧面板 ===== */
+.app-left-panel {
+  width: 220px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e8e8e8;
+  background: #fff;
+  overflow: hidden;
+}
+
+.app-left-top {
+  flex-shrink: 0;
+}
+
+.app-left-bottom {
+  flex: 1;
+  overflow: auto;
+}
+
+/* ===== 右侧属性面板 ===== */
+.app-right-panel {
+  width: 260px;
+  min-width: 260px;
+  border-left: 1px solid #e8e8e8;
+  background: #fff;
+  overflow: auto;
+}
+
+/* ===== Canvas 网格样式 ===== */
+.canvas-grid {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* react-grid-layout placeholder */
+.react-grid-item.react-grid-placeholder {
+  background: #1677ff !important;
+  opacity: 0.15 !important;
+  border-radius: 4px;
+}
