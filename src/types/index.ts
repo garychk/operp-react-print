@@ -53,3 +53,11 @@ export interface GridSettings {
   /** 列数 */
   cols: number;
 }
+
+/* ========== 模板数据（导出/导入 JSON 格式） ========== */
+export interface TemplateData {
+  version: string;
+  templateName: string;
+  pageSettings: PageSettings;
+  components: Omit<CanvasComponent, 'id'>[];
+}

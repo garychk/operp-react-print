@@ -1,4 +1,5 @@
 import React from 'react';
+import { App as AntApp } from 'antd';
 import Toolbar from './components/Toolbar';
 import PageSettings from './components/PageSettings';
 import ComponentPanel from './components/ComponentPanel';
@@ -9,7 +10,8 @@ import HeaderFooterDialog from './components/HeaderFooterDialog';
 
 const App: React.FC = () => {
   return (
-    <div className="app-container">
+    <AntApp>
+      <div className="app-container">
       {/* 顶部工具栏 */}
       <Toolbar />
 
@@ -40,6 +42,7 @@ const App: React.FC = () => {
       {/* 页眉页脚弹窗 */}
       <HeaderFooterDialog />
     </div>
+    </AntApp>
   );
 };
 

@@ -4,6 +4,7 @@ import {
   CanvasComponentType,
   PageSettings,
   GridSettings,
+  TemplateData,
 } from '../types';
 import {
   DEFAULT_PAGE_SETTINGS,
@@ -42,6 +43,12 @@ export interface DesignerStore {
   setPreviewVisible: (visible: boolean) => void;
   setTemplateName: (name: string) => void;
   setHeaderFooterVisible: (visible: boolean) => void;
+  /** 获取导出用的模板 JSON 字符串 */
+  exportJSON: () => string;
+  /** 从 JSON 字符串导入模板，返回 null 表示成功，返回 string 表示错误信息 */
+  importJSON: (jsonStr: string) => string | null;
+  /** 重置整个设计 */
+  reset: () => void;
 }
 
 export const useDesignerStore = create<DesignerStore>((set, get) => ({
@@ -114,5 +121,52 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
 
   setHeaderFooterVisible: (visible) => {
     set({ headerFooterVisible: visible });
+  },
+
+  exportJSON: () => {
+    const s = get();
+    const data: TemplateData = {
+      version: '1.0',
+      templateName: s.templateName,
+      pageSettings: s.pageSettings,
+      components: s.components.map(({ id, ...rest }) => rest),
+    };
+    return JSON.stringify(data, null, 2);
+  },
+
+  importJSON: (jsonStr) => {
+    try {
+      const data = JSON.parse(jsonStr) as TemplateData;
+      if (!data.version || !data.pageSettings || !Array.isArray(data.components)) {
+        return 'JSON 格式不正确，缺少必要字段';
+      }
+      // 重新分配 ID
+      nextId = 0;
+      const components: CanvasComponent[] = data.components.map((c) => ({
+        ...c,
+        id: generateId(),
+      }));
+      set({
+        components,
+        pageSettings: data.pageSettings,
+        templateName: data.templateName || '导入的模板',
+        selectedId: null,
+      });
+      return null;
+    } catch {
+      return 'JSON 解析失败，请检查文件内容';
+    }
+  },
+
+  reset: () => {
+    nextId = 0;
+    set({
+      components: [],
+      selectedId: null,
+      pageSettings: { ...DEFAULT_PAGE_SETTINGS },
+      templateName: '未命名模板',
+      headerFooterVisible: false,
+      previewVisible: false,
+    });
   },
 }));
