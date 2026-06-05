@@ -5,6 +5,8 @@ import {
   PageSettings,
   GridSettings,
   TemplateData,
+  DataSource,
+  TableColumnConfig,
 } from '../types';
 import {
   DEFAULT_PAGE_SETTINGS,
@@ -14,8 +16,12 @@ import {
 } from '../constants';
 
 let nextId = 0;
+let dataSourceNextId = 0;
 function generateId(): string {
   return `comp_${++nextId}`;
+}
+function generateDataSourceId(): string {
+  return `ds_${++dataSourceNextId}`;
 }
 
 export interface DesignerStore {
@@ -33,6 +39,10 @@ export interface DesignerStore {
   templateName: string;
   // 页眉页脚弹窗
   headerFooterVisible: boolean;
+  // 数据源列表
+  dataSources: DataSource[];
+  // 当前预览时选中使用的数据源 ID（用于表格）
+  activeDataSourceId: string | null;
 
   // 操作
   addComponent: (type: CanvasComponentType, x?: number, y?: number) => void;
@@ -44,6 +54,13 @@ export interface DesignerStore {
   setPreviewVisible: (visible: boolean) => void;
   setTemplateName: (name: string) => void;
   setHeaderFooterVisible: (visible: boolean) => void;
+  // 数据源操作
+  addDataSource: (name: string, type: 'object' | 'array', data: string) => void;
+  updateDataSource: (id: string, updates: Partial<Omit<DataSource, 'id' | 'createdAt'>>) => void;
+  removeDataSource: (id: string) => void;
+  setActiveDataSourceId: (id: string | null) => void;
+  // 表格列配置操作
+  updateComponentTableColumns: (compId: string, columns: TableColumnConfig[]) => void;
   /** 获取导出用的模板 JSON 字符串 */
   exportJSON: () => string;
   /** 从 JSON 字符串导入模板，返回 null 表示成功，返回 string 表示错误信息 */
@@ -60,6 +77,8 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
   previewVisible: false,
   templateName: '未命名模板',
   headerFooterVisible: false,
+  dataSources: [],
+  activeDataSourceId: null,
 
   addComponent: (type, x, y) => {
     const id = generateId();
@@ -76,6 +95,7 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
       w: type === 'line' ? 20 : 15,
       h: type === 'line' ? 1 : 8,
       props: defaults,
+      ...(type === 'table' ? { tableColumns: [{ title: '列1' }, { title: '列2' }, { title: '列3' }] } : {}),
     };
     set((s) => ({
       components: [...s.components, newComp],
@@ -124,6 +144,49 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
     set({ headerFooterVisible: visible });
   },
 
+  // ========== 数据源管理 ==========
+  addDataSource: (name, type, data) => {
+    const id = generateDataSourceId();
+    const newDs: DataSource = {
+      id,
+      name,
+      type,
+      data,
+      createdAt: Date.now(),
+    };
+    set((s) => ({
+      dataSources: [...s.dataSources, newDs],
+    }));
+  },
+
+  updateDataSource: (id, updates) => {
+    set((s) => ({
+      dataSources: s.dataSources.map((ds) =>
+        ds.id === id ? { ...ds, ...updates } : ds,
+      ),
+    }));
+  },
+
+  removeDataSource: (id) => {
+    set((s) => ({
+      dataSources: s.dataSources.filter((ds) => ds.id !== id),
+      activeDataSourceId: s.activeDataSourceId === id ? null : s.activeDataSourceId,
+    }));
+  },
+
+  setActiveDataSourceId: (id) => {
+    set({ activeDataSourceId: id });
+  },
+
+  // ========== 表格列配置管理 ==========
+  updateComponentTableColumns: (compId, columns) => {
+    set((s) => ({
+      components: s.components.map((c) =>
+        c.id === compId ? { ...c, tableColumns: columns } : c,
+      ),
+    }));
+  },
+
   exportJSON: () => {
     const s = get();
     const data: TemplateData = {
@@ -131,6 +194,7 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
       templateName: s.templateName,
       pageSettings: s.pageSettings,
       components: s.components.map(({ id, ...rest }) => rest),
+      dataSources: s.dataSources.map(({ id, ...rest }) => rest),
     };
     return JSON.stringify(data, null, 2);
   },
@@ -143,15 +207,22 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
       }
       // 重新分配 ID
       nextId = 0;
+      dataSourceNextId = 0;
       const components: CanvasComponent[] = data.components.map((c) => ({
         ...c,
         id: generateId(),
       }));
+      const dataSources: DataSource[] = (data.dataSources || []).map((ds) => ({
+        ...ds,
+        id: generateDataSourceId(),
+      }));
       set({
         components,
+        dataSources,
         pageSettings: data.pageSettings,
         templateName: data.templateName || '导入的模板',
         selectedId: null,
+        activeDataSourceId: null,
       });
       return null;
     } catch {
@@ -161,6 +232,7 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
 
   reset: () => {
     nextId = 0;
+    dataSourceNextId = 0;
     set({
       components: [],
       selectedId: null,
@@ -169,6 +241,8 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
       templateName: '未命名模板',
       headerFooterVisible: false,
       previewVisible: false,
+      dataSources: [],
+      activeDataSourceId: null,
     });
   },
 }));

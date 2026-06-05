@@ -1,10 +1,18 @@
-import React, { useRef, useMemo } from 'react';
-import { Modal, Button, Space } from 'antd';
-import { PrinterOutlined } from '@ant-design/icons';
+import React, { useRef, useMemo, useState } from 'react';
+import { Modal, Button, Space, Select, Typography, Divider, Alert } from 'antd';
+import { PrinterOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { useReactToPrint } from 'react-to-print';
 import { useDesignerStore } from '../store';
 import { PAPER_SIZES, MM_TO_PX_RATIO, DEFAULT_GRID_SETTINGS } from '../constants';
 import Barcode from './Barcode';
+import {
+  safeParseJSON,
+  getValueByPath,
+  getObjectFromDataSource,
+  getArrayFromDataSource,
+} from '../utils/dataHelper';
+
+const { Text } = Typography;
 
 const PrintPreview: React.FC = () => {
   const previewVisible = useDesignerStore((s) => s.previewVisible);
@@ -12,7 +20,13 @@ const PrintPreview: React.FC = () => {
   const components = useDesignerStore((s) => s.components);
   const pageSettings = useDesignerStore((s) => s.pageSettings);
   const gridSettings = useDesignerStore((s) => s.gridSettings) || DEFAULT_GRID_SETTINGS;
+  const dataSources = useDesignerStore((s) => s.dataSources);
   const printRef = useRef<HTMLDivElement>(null);
+
+  // 预览时选择的 object 类型数据源
+  const [selectedObjDSId, setSelectedObjDSId] = useState<string | null>(null);
+  const objDataSources = dataSources.filter((ds) => ds.type === 'object');
+  const selectedObjDS = selectedObjDSId ? dataSources.find((ds) => ds.id === selectedObjDSId) : (objDataSources[0] || null);
 
   const pagePixel = useMemo(() => {
     const preset = PAPER_SIZES[pageSettings.paperSize as keyof typeof PAPER_SIZES];
@@ -56,15 +70,70 @@ const PrintPreview: React.FC = () => {
     `,
   }) as () => void;
 
-  /** 简易组件渲染（无交互版本） */
-  const renderStaticComponent = (comp: (typeof components)[0]): React.ReactNode => {
+  // 获取渲染时的实际值（考虑数据绑定）
+  const getRenderValue = (comp: any, field: string): string => {
+    const binding = comp.props[`${field}Binding`];
+    if (binding && binding.dataSourceId && binding.fieldPath && selectedObjDS) {
+      const ds = dataSources.find((d) => d.id === binding.dataSourceId);
+      if (ds && ds.type === 'object') {
+        const data = getObjectFromDataSource(ds);
+        if (data) {
+          const val = getValueByPath(data, binding.fieldPath);
+          if (val !== '') {
+            return val;
+          }
+        }
+      }
+    }
+    return binding?.staticValue ?? String(comp.props[field] || '');
+  };
+
+  // 表格数据渲染
+  const renderTableData = (comp: any) => {
+    const tableDSId = comp.props.tableDataSourceId;
+    const ds = tableDSId ? dataSources.find((d) => d.id === tableDSId) : null;
+    const data = ds ? getArrayFromDataSource(ds) : null;
+    const cols = comp.tableColumns || [];
+    const borderWidth = (comp.props.borderWidth as number) || 1;
+    const borderColor = (comp.props.borderColor as string) || '#000000';
+
+    // 如果没有数据或者没有绑定，展示静态的几行
+    const displayData = data || Array.from({ length: (comp.props.rows as number) || 3 }).map(() => ({}));
+
+    return (
+      <table
+        style={{
+          width: '100%',
+          height: '100%',
+          borderCollapse: 'collapse',
+        }}
+      >
+        <tbody>
+          {displayData.map((row, rIndex) => (
+            <tr key={rIndex}>
+              {cols.map((col, cIndex) => (
+                <td
+                  key={cIndex}
+                  style={{
+                    border: `${borderWidth}px solid ${borderColor}`,
+                    padding: 4,
+                    textAlign: 'center',
+                    fontSize: 12,
+                  }}
+                >
+                  {col.fieldPath ? getValueByPath(row, col.fieldPath) : (col.title || '')}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
+
+  // 简易组件渲染（无交互版本）
+  const renderStaticComponent = (comp: any): React.ReactNode => {
     const p = comp.props;
-    const baseStyle: React.CSSProperties = {
-      width: '100%',
-      height: '100%',
-      overflow: 'hidden',
-      boxSizing: 'border-box',
-    };
     const containerStyle: React.CSSProperties = {
       position: 'absolute',
       left: comp.x * cellSize,
@@ -72,6 +141,13 @@ const PrintPreview: React.FC = () => {
       width: comp.w * cellSize,
       height: comp.h * cellSize,
       overflow: 'hidden',
+    };
+
+    const baseStyle: React.CSSProperties = {
+      width: '100%',
+      height: '100%',
+      overflow: 'hidden',
+      boxSizing: 'border-box',
     };
 
     switch (comp.type) {
@@ -92,7 +168,7 @@ const PrintPreview: React.FC = () => {
                 wordBreak: 'break-word',
               }}
             >
-              {(p.content as string) || ''}
+              {getRenderValue(comp, 'content')}
             </div>
           </div>
         );
@@ -102,7 +178,7 @@ const PrintPreview: React.FC = () => {
             <div style={baseStyle}>
               {p.src ? (
                 <img
-                  src={p.src as string}
+                  src={getRenderValue(comp, 'src')}
                   style={{
                     width: '100%',
                     height: '100%',
@@ -117,34 +193,7 @@ const PrintPreview: React.FC = () => {
       case 'table':
         return (
           <div key={comp.id} style={containerStyle}>
-            <table
-              style={{
-                ...baseStyle,
-                borderCollapse: 'collapse',
-                width: '100%',
-                height: '100%',
-              }}
-            >
-              <tbody>
-                {Array.from({ length: (p.rows as number) || 3 }).map((_, r) => (
-                  <tr key={r}>
-                    {Array.from({ length: (p.cols as number) || 3 }).map((_, c) => (
-                      <td
-                        key={c}
-                        style={{
-                          border: `${p.borderWidth || 1}px solid ${p.borderColor || '#000'}`,
-                          padding: 2,
-                          fontSize: 12,
-                          textAlign: 'center',
-                        }}
-                      >
-                        &nbsp;
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {renderTableData(comp)}
           </div>
         );
       case 'barcode':
@@ -160,7 +209,7 @@ const PrintPreview: React.FC = () => {
               }}
             >
               <Barcode
-                value={(p.value as string) || '123456'}
+                value={getRenderValue(comp, 'value')}
                 format={(p.format as string) || 'CODE128'}
               />
             </div>
@@ -207,8 +256,29 @@ const PrintPreview: React.FC = () => {
           </Button>
         </Space>
       }
-      styles={{ body: { padding: 16, display: 'flex', justifyContent: 'center' } }}
+      styles={{ body: { padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center' } }}
     >
+      {/* 预览时的数据源选择 */}
+      {objDataSources.length > 0 && (
+        <div style={{ marginBottom: 12, width: '100%' }}>
+          <Alert
+            message="选择预览数据源"
+            description="选择一个对象类型数据源来预览模板"
+            type="info"
+            showIcon
+            style={{ marginBottom: 8 }}
+          />
+          <Select
+            style={{ width: '100%' }}
+            placeholder="选择一个对象数据源进行预览"
+            value={selectedObjDSId || (objDataSources.length > 0 ? objDataSources[0].id : '')}
+            onChange={(v) => setSelectedObjDSId(v)}
+            options={objDataSources.map((ds) => ({ label: ds.name, value: ds.id }))}
+          />
+        </div>
+      )}
+      <Divider style={{ margin: '4px 0 12px 0' }} />
+
       <div
         ref={printRef}
         style={{

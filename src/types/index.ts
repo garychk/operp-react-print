@@ -1,7 +1,27 @@
 /* ========== 画布组件类型 ========== */
 export type CanvasComponentType = 'text' | 'image' | 'table' | 'barcode' | 'line';
 
-/* ========== 画布上的组件实例 ========== */
+/* ========== 数据绑定类型 ========== */
+export interface DataBinding {
+  /** 绑定的数据源 ID */
+  dataSourceId?: string;
+  /** 绑定的字段路径（支持点号，如 user.name） */
+  fieldPath?: string;
+  /** 原始静态值（当未绑定数据时使用） */
+  staticValue: string;
+}
+
+/* ========== 表格列配置 ========== */
+export interface TableColumnConfig {
+  /** 列标题 */
+  title: string;
+  /** 绑定的字段路径 */
+  fieldPath?: string;
+  /** 列宽（可选） */
+  width?: number;
+}
+
+/* ========== 画布上的组件实例（更新版本） ========== */
 export interface CanvasComponent {
   id: string;
   type: CanvasComponentType;
@@ -12,6 +32,21 @@ export interface CanvasComponent {
   h: number;
   /** 组件自定义属性 */
   props: Record<string, unknown>;
+  /** 表格组件专用：列配置 */
+  tableColumns?: TableColumnConfig[];
+}
+
+/* ========== 数据源类型 ========== */
+export type DataSourceType = 'object' | 'array';
+
+export interface DataSource {
+  id: string;
+  name: string;
+  type: DataSourceType;
+  /** JSON 字符串存储 */
+  data: string;
+  /** 创建时间戳 */
+  createdAt: number;
 }
 
 /* ========== 纸张尺寸预设 ========== */
@@ -60,4 +95,5 @@ export interface TemplateData {
   templateName: string;
   pageSettings: PageSettings;
   components: Omit<CanvasComponent, 'id'>[];
+  dataSources: Omit<DataSource, 'id'>[];
 }

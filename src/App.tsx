@@ -1,8 +1,7 @@
 import React from 'react';
 import { App as AntApp } from 'antd';
 import Toolbar from './components/Toolbar';
-import PageSettings from './components/PageSettings';
-import ComponentPanel from './components/ComponentPanel';
+import LeftPanel from './components/LeftPanel';
 import Canvas from './components/Canvas';
 import PropertyPanel from './components/PropertyPanel';
 import PrintPreview from './components/PrintPreview';
@@ -17,14 +16,9 @@ const App: React.FC = () => {
 
       {/* 主体三栏布局 */}
       <div className="app-body">
-        {/* 左侧面板：页面设置 + 组件面板 */}
+        {/* 左侧面板 */}
         <div className="app-left-panel">
-          <div className="app-left-top">
-            <PageSettings />
-          </div>
-          <div className="app-left-bottom">
-            <ComponentPanel />
-          </div>
+          <LeftPanel />
         </div>
 
         {/* 中间画布 */}
