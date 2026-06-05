@@ -58,7 +58,13 @@ const PrintPreview: React.FC = () => {
   /** 简易组件渲染（无交互版本） */
   const renderStaticComponent = (comp: (typeof components)[0]): React.ReactNode => {
     const p = comp.props;
-    const style: React.CSSProperties = {
+    const baseStyle: React.CSSProperties = {
+      width: '100%',
+      height: '100%',
+      overflow: 'hidden',
+      boxSizing: 'border-box',
+    };
+    const containerStyle: React.CSSProperties = {
       position: 'absolute',
       left: comp.x * cellSize,
       top: comp.y * cellSize,
@@ -70,45 +76,53 @@ const PrintPreview: React.FC = () => {
     switch (comp.type) {
       case 'text':
         return (
-          <div
-            key={comp.id}
-            style={{
-              ...style,
-              fontSize: (p.fontSize as number) || 14,
-              fontWeight: (p.fontWeight as React.CSSProperties['fontWeight']) || 'normal',
-              fontStyle: (p.fontStyle as React.CSSProperties['fontStyle']) || 'normal',
-              textAlign: (p.textAlign as React.CSSProperties['textAlign']) || 'left',
-              color: (p.color as string) || '#000',
-              backgroundColor: (p.backgroundColor as string) || 'transparent',
-              padding: 4,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-            }}
-          >
-            {(p.content as string) || ''}
+          <div key={comp.id} style={containerStyle}>
+            <div
+              style={{
+                ...baseStyle,
+                fontSize: (p.fontSize as number) || 14,
+                fontWeight: (p.fontWeight as React.CSSProperties['fontWeight']) || 'normal',
+                fontStyle: (p.fontStyle as React.CSSProperties['fontStyle']) || 'normal',
+                textAlign: (p.textAlign as React.CSSProperties['textAlign']) || 'left',
+                color: (p.color as string) || '#000',
+                backgroundColor: (p.backgroundColor as string) || 'transparent',
+                padding: 4,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+            >
+              {(p.content as string) || ''}
+            </div>
           </div>
         );
       case 'image':
         return (
-          <div key={comp.id} style={style}>
-            {p.src ? (
-              <img
-                src={p.src as string}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: (p.fit as React.CSSProperties['objectFit']) || 'contain',
-                }}
-                alt=""
-              />
-            ) : null}
+          <div key={comp.id} style={containerStyle}>
+            <div style={baseStyle}>
+              {p.src ? (
+                <img
+                  src={p.src as string}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: (p.fit as React.CSSProperties['objectFit']) || 'contain',
+                  }}
+                  alt=""
+                />
+              ) : null}
+            </div>
           </div>
         );
       case 'table':
         return (
-          <div key={comp.id} style={style}>
+          <div key={comp.id} style={containerStyle}>
             <table
-              style={{ borderCollapse: 'collapse', width: '100%', height: '100%' }}
+              style={{
+                ...baseStyle,
+                borderCollapse: 'collapse',
+                width: '100%',
+                height: '100%',
+              }}
             >
               <tbody>
                 {Array.from({ length: (p.rows as number) || 3 }).map((_, r) => (
@@ -119,6 +133,8 @@ const PrintPreview: React.FC = () => {
                         style={{
                           border: `${p.borderWidth || 1}px solid ${p.borderColor || '#000'}`,
                           padding: 2,
+                          fontSize: 12,
+                          textAlign: 'center',
                         }}
                       >
                         &nbsp;
@@ -132,21 +148,40 @@ const PrintPreview: React.FC = () => {
         );
       case 'barcode':
         return (
-          <div key={comp.id} style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>
-            *{(p.value as string) || '123456'}*
+          <div key={comp.id} style={containerStyle}>
+            <div
+              style={{
+                ...baseStyle,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 4,
+              }}
+            >
+              *{(p.value as string) || '123456'}*
+            </div>
           </div>
         );
       case 'line':
         return (
-          <div key={comp.id} style={{ ...style, display: 'flex', alignItems: 'center' }}>
-            <hr
+          <div key={comp.id} style={containerStyle}>
+            <div
               style={{
-                width: '100%',
+                ...baseStyle,
+                display: 'flex',
+                alignItems: 'center',
                 border: 'none',
-                borderTop: `${p.thickness || 1}px ${p.style || 'solid'} ${p.color || '#000'}`,
-                margin: 0,
               }}
-            />
+            >
+              <hr
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  borderTop: `${p.thickness || 1}px ${p.style || 'solid'} ${p.color || '#000'}`,
+                  margin: 0,
+                }}
+              />
+            </div>
           </div>
         );
       default:

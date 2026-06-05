@@ -328,6 +328,8 @@ const Canvas: React.FC = () => {
             cols={gridSettings.cols}
             rowHeight={canvasW / gridSettings.cols}
             width={canvasW}
+            margin={[0, 0]}
+            containerPadding={[0, 0]}
             onLayoutChange={handleLayoutChange}
             onDrop={handleDrop}
             isDroppable
