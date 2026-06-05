@@ -4,6 +4,7 @@ import { PrinterOutlined } from '@ant-design/icons';
 import { useReactToPrint } from 'react-to-print';
 import { useDesignerStore } from '../store';
 import { PAPER_SIZES, MM_TO_PX_RATIO, DEFAULT_GRID_SETTINGS } from '../constants';
+import Barcode from './Barcode';
 
 const PrintPreview: React.FC = () => {
   const previewVisible = useDesignerStore((s) => s.previewVisible);
@@ -158,7 +159,10 @@ const PrintPreview: React.FC = () => {
                 padding: 4,
               }}
             >
-              *{(p.value as string) || '123456'}*
+              <Barcode
+                value={(p.value as string) || '123456'}
+                format={(p.format as string) || 'CODE128'}
+              />
             </div>
           </div>
         );
