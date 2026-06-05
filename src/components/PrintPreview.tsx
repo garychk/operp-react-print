@@ -3,13 +3,14 @@ import { Modal, Button, Space } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import { useReactToPrint } from 'react-to-print';
 import { useDesignerStore } from '../store';
-import { PAPER_SIZES, MM_TO_PX_RATIO } from '../constants';
+import { PAPER_SIZES, MM_TO_PX_RATIO, DEFAULT_GRID_SETTINGS } from '../constants';
 
 const PrintPreview: React.FC = () => {
   const previewVisible = useDesignerStore((s) => s.previewVisible);
   const setPreviewVisible = useDesignerStore((s) => s.setPreviewVisible);
   const components = useDesignerStore((s) => s.components);
   const pageSettings = useDesignerStore((s) => s.pageSettings);
+  const gridSettings = useDesignerStore((s) => s.gridSettings) || DEFAULT_GRID_SETTINGS;
   const printRef = useRef<HTMLDivElement>(null);
 
   const pagePixel = useMemo(() => {
@@ -38,6 +39,7 @@ const PrintPreview: React.FC = () => {
   );
 
   const canvasW = pagePixel.width - marginPx.left - marginPx.right;
+  const cellSize = canvasW / gridSettings.cols;
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -58,10 +60,10 @@ const PrintPreview: React.FC = () => {
     const p = comp.props;
     const style: React.CSSProperties = {
       position: 'absolute',
-      left: comp.x * (canvasW / 100),
-      top: comp.y * (canvasW / 100),
-      width: comp.w * (canvasW / 100),
-      height: comp.h * (canvasW / 100),
+      left: comp.x * cellSize,
+      top: comp.y * cellSize,
+      width: comp.w * cellSize,
+      height: comp.h * cellSize,
       overflow: 'hidden',
     };
 

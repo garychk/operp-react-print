@@ -6,7 +6,7 @@ import {
   SettingOutlined,
   DownloadOutlined,
   UploadOutlined,
-  FileAddOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 import { useDesignerStore } from '../store';
 
@@ -95,7 +95,7 @@ const Toolbar: React.FC = () => {
         
       </Space>
       <Space>
-        <Button icon={<FileAddOutlined />} onClick={handleReset}>
+        <Button icon={<PlusOutlined />} onClick={handleReset}>
           新建
         </Button>
         <input

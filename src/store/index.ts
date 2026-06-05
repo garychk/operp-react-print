@@ -10,6 +10,7 @@ import {
   DEFAULT_PAGE_SETTINGS,
   COMPONENT_DEFAULTS,
   COMPONENT_TYPE_LABELS,
+  DEFAULT_GRID_SETTINGS,
 } from '../constants';
 
 let nextId = 0;
@@ -55,7 +56,7 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
   components: [],
   selectedId: null,
   pageSettings: { ...DEFAULT_PAGE_SETTINGS },
-  gridSettings: { cellSize: 1, cols: 100 },
+  gridSettings: { ...DEFAULT_GRID_SETTINGS },
   previewVisible: false,
   templateName: '未命名模板',
   headerFooterVisible: false,
@@ -164,6 +165,7 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
       components: [],
       selectedId: null,
       pageSettings: { ...DEFAULT_PAGE_SETTINGS },
+      gridSettings: { ...DEFAULT_GRID_SETTINGS },
       templateName: '未命名模板',
       headerFooterVisible: false,
       previewVisible: false,

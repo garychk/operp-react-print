@@ -30,6 +30,12 @@ export const DEFAULT_PAGE_SETTINGS = {
 /** 缩放系数: 1mm 对应的像素 */
 export const MM_TO_PX_RATIO = 3;
 
+/** 默认网格设置 */
+export const DEFAULT_GRID_SETTINGS = {
+  cellSize: 1,
+  cols: 100,
+};
+
 /** 组件类型中文名 */
 export const COMPONENT_TYPE_LABELS: Record<string, string> = {
   text: '文本',
