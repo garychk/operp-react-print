@@ -30,8 +30,6 @@ const PageSettings: React.FC = () => {
     <Card
       title="页面设置"
       size="small"
-      style={{ height: '100%', borderRadius: 0, borderRight: 0 }}
-      styles={{ body: { padding: 16 } }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>

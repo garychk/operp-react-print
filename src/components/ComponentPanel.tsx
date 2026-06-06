@@ -49,8 +49,6 @@ const ComponentPanel: React.FC = () => {
     <Card
       title="组件面板"
       size="small"
-      style={{ height: '100%', borderRadius: 0, borderRight: 0 }}
-      styles={{ body: { padding: 8 } }}
     >
       <Space direction="vertical" style={{ width: '100%' }} size={4}>
         {items.map((item) => (
