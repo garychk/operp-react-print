@@ -59,20 +59,24 @@ export const COMPONENT_DEFAULTS = {
   image: {
     src: '',
     fit: 'contain' as const,
+    content: '',
   },
   table: {
     rows: 3,
     cols: 3,
     borderWidth: 1,
     borderColor: '#000000',
+    content: '',
   },
   barcode: {
     value: '1234567890',
     format: 'CODE128' as const,
+    content: '',
   },
   line: {
     color: '#000000',
     thickness: 1,
     style: 'solid' as const,
+    content: '',
   },
 };
