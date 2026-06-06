@@ -15,8 +15,10 @@ import {
   Popconfirm,
   Form,
   Tag,
+  Table,
 } from 'antd';
-import { PlusOutlined, DeleteOutlined, DatabaseOutlined, LinkOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, DatabaseOutlined, LinkOutlined, SaveOutlined } from '@ant-design/icons';
+import type { TableProps } from 'antd';
 import { useDesignerStore } from '../store';
 import { COMPONENT_TYPE_LABELS } from '../constants';
 import { TableColumnConfig } from '../types';
@@ -262,8 +264,8 @@ const PropertyPanel: React.FC = () => {
             <span style={{ fontWeight: 500 }}>数据绑定已启用</span>
             {selectedDs && cfg.fieldPath && (
               <span style={{ marginLeft: 8 }}>
-                <Tag color="blue" size="small">{selectedDs.name}</Tag>
-                <Tag color="green" size="small">{cfg.fieldPath}</Tag>
+                <Tag color="blue">{selectedDs.name}</Tag>
+                <Tag color="green">{cfg.fieldPath}</Tag>
               </span>
             )}
           </div>
@@ -279,27 +281,29 @@ const PropertyPanel: React.FC = () => {
     const selectedTableDSId = (comp.props.tableDataSourceId || '') as string;
     const selectedTableDS = arrayDataSources.find((ds) => ds.id === selectedTableDSId);
 
-    // 初始化 tempColumns（只做一次，后续由用户手动点击编辑）
-    const initTemp = () => {
-      setTempColumns([...columns]);
-    };
+    // 使用 tempColumns 或 columns
+    const displayColumns = tempColumns.length > 0 ? tempColumns : columns;
 
+    // 保存列配置
     const saveColumns = () => {
-      updateComponentTableColumns(selectedId!, tempColumns);
+      updateComponentTableColumns(selectedId!, displayColumns);
     };
 
+    // 添加列（立即生效）
     const addColumn = () => {
-      const newColumns = [...tempColumns, { title: `列${tempColumns.length + 1}` }];
+      const newColumns = [...displayColumns, { title: `列${displayColumns.length + 1}` }];
       setTempColumns(newColumns);
     };
 
+    // 删除列（立即生效）
     const removeColumn = (index: number) => {
-      const newColumns = tempColumns.filter((_, i) => i !== index);
+      const newColumns = displayColumns.filter((_, i) => i !== index);
       setTempColumns(newColumns);
     };
 
+    // 更新列（立即生效）
     const updateColumn = (index: number, key: keyof TableColumnConfig, value: string) => {
-      const newColumns = [...tempColumns];
+      const newColumns = [...displayColumns];
       newColumns[index] = { ...newColumns[index], [key]: value };
       setTempColumns(newColumns);
     };
@@ -312,6 +316,79 @@ const PropertyPanel: React.FC = () => {
         arrayKeys = Object.keys(parsed[0]);
       }
     }
+
+    // Table columns
+    const tableColumns: TableProps<TableColumnConfig & { key: string }>['columns'] = [
+      {
+        title: '列标题',
+        dataIndex: 'title',
+        width: 100,
+        render: (_, record) => {
+          return (
+            <Input
+              size="small"
+              value={record.title}
+              placeholder="列标题"
+              onChange={(e) => {
+                // 只更新本地状态，不立即保存到 store
+                updateColumn(Number(record.key), 'title', e.target.value);
+              }}
+              onBlur={() => {
+                // 失去焦点时再保存到 store
+                saveColumns();
+              }}
+            />
+          );
+        },
+      },
+      {
+        title: '绑定字段',
+        dataIndex: 'fieldPath',
+        width: 120,
+        render: (_, record) => {
+          return (
+            <Select
+              size="small"
+              style={{ width: '100%' }}
+              value={record.fieldPath || ''}
+              placeholder={selectedTableDS ? '绑定字段' : '选择数据源先'}
+              disabled={!selectedTableDS}
+              onChange={(v) => {
+                updateColumn(Number(record.key), 'fieldPath', v || '');
+                saveColumns();
+              }}
+              options={[
+                { label: '无绑定', value: '' },
+                ...arrayKeys.map((k) => ({ label: k, value: k })),
+              ]}
+            />
+          );
+        },
+      },
+      {
+        title: '操作',
+        width: 60,
+        render: (_, record) => (
+          <Popconfirm
+            title="确定要删除吗?"
+            onConfirm={() => {
+              removeColumn(Number(record.key));
+              saveColumns();
+            }}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Button type="text" danger size="small" icon={<DeleteOutlined />} />
+          </Popconfirm>
+        ),
+      },
+    ];
+
+    // 转换数据用于 Table
+    const tableData = displayColumns.map((col, index) => ({
+      ...col,
+      key: String(index),
+    }));
 
     return (
       <div>
@@ -329,73 +406,19 @@ const PropertyPanel: React.FC = () => {
             ...arrayDataSources.map((ds) => ({ label: ds.name, value: ds.id })),
           ]}
         />
-        <Divider style={{ margin: '8px 0' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <Divider />
+        <Space style={{ marginBottom: 8 }}>
           <Text style={{ fontSize: 12 }}>列配置</Text>
-          <Space>
-            <Button size="small" type="dashed" icon={<PlusOutlined />} onClick={() => { initTemp(); addColumn(); }}>
-              添加列
-            </Button>
-            <Button size="small" type="primary" onClick={() => { initTemp(); saveColumns(); }}>
-              保存列配置
-            </Button>
-          </Space>
-        </div>
-        <List
+          <Button size="small" type="dashed" icon={<PlusOutlined />} onClick={addColumn} />
+          <Button size="small" type="primary" onClick={saveColumns} icon={<SaveOutlined />} />
+        </Space>
+        <Table
+          dataSource={tableData}
+          columns={tableColumns}
+          pagination={false}
           size="small"
-          dataSource={columns}
-          locale={{ emptyText: '暂无列' }}
-          renderItem={(col, index) => (
-            <List.Item
-              actions={[
-                <Popconfirm
-                  title="确定要删除吗?"
-                  onConfirm={() => {
-                    initTemp();
-                    removeColumn(index);
-                    saveColumns();
-                  }}
-                  okText="确定"
-                  cancelText="取消"
-                >
-                  <Button type="text" danger size="small" icon={<DeleteOutlined />} />
-                </Popconfirm>,
-              ]}
-            >
-              <div style={{ width: '100%' }}>
-                <Text strong style={{ fontSize: 12, display: 'block' }}>
-                  列 {index + 1}
-                </Text>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginTop: 4 }}>
-                  <Input
-                    size="small"
-                    value={col.title}
-                    placeholder="列标题"
-                    onChange={(e) => {
-                      initTemp();
-                      updateColumn(index, 'title', e.target.value);
-                      saveColumns();
-                    }}
-                  />
-                  <Select
-                    size="small"
-                    value={col.fieldPath || ''}
-                    placeholder={selectedTableDS ? '绑定字段' : '选择数据源先'}
-                    disabled={!selectedTableDS}
-                    onChange={(v) => {
-                      initTemp();
-                      updateColumn(index, 'fieldPath', v || '');
-                      saveColumns();
-                    }}
-                    options={[
-                      { label: '无绑定', value: '' },
-                      ...arrayKeys.map((k) => ({ label: k, value: k })),
-                    ]}
-                  />
-                </div>
-              </div>
-            </List.Item>
-          )}
+          bordered
+          rowKey="key"
         />
       </div>
     );

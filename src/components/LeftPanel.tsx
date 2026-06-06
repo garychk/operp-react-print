@@ -1,57 +1,32 @@
 import React from 'react';
-import { Tabs } from 'antd';
-import { SettingOutlined, AppstoreOutlined, DatabaseOutlined } from '@ant-design/icons';
+import { Collapse } from 'antd';
 import PageSettings from './PageSettings';
 import ComponentPanel from './ComponentPanel';
 import DataSourcePanel from './DataSourcePanel';
+import { CaretRightOutlined } from '@ant-design/icons';
 
 const LeftPanel: React.FC = () => {
   return (
-    <Tabs
-      defaultActiveKey="1"
-      style={{ height: '100%' }}
+    <Collapse
+      bordered={false}
+      defaultActiveKey={['1', '2']}
+      expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+      style={{ height: '100%', overflowY: 'auto' }}
       items={[
         {
           key: '1',
-          label: (
-            <span>
-              <SettingOutlined />
-              页面设置
-            </span>
-          ),
-          children: (
-            <div style={{ padding: '0 8px 8px 8px', height: '100%', overflowY: 'auto' }}>
-              <PageSettings />
-            </div>
-          ),
+          label: '页面设置',
+          children: <PageSettings />,
         },
         {
           key: '2',
-          label: (
-            <span>
-              <AppstoreOutlined />
-              组件
-            </span>
-          ),
-          children: (
-            <div style={{ padding: '0 8px 8px 8px', height: '100%', overflowY: 'auto' }}>
-              <ComponentPanel />
-            </div>
-          ),
+          label: '组件',
+          children: <ComponentPanel />,
         },
         {
           key: '3',
-          label: (
-            <span>
-              <DatabaseOutlined />
-              数据源
-            </span>
-          ),
-          children: (
-            <div style={{ padding: '0 8px 8px 8px', height: '100%', overflowY: 'auto' }}>
-              <DataSourcePanel />
-            </div>
-          ),
+          label: '数据源',
+          children: <DataSourcePanel />,
         },
       ]}
     />

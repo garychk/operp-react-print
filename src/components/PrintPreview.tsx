@@ -1,6 +1,6 @@
-import React, { useRef, useMemo, useState } from 'react';
-import { Modal, Button, Space, Select, Typography, Divider, Alert } from 'antd';
-import { PrinterOutlined, DatabaseOutlined } from '@ant-design/icons';
+import React, { useRef, useMemo } from 'react';
+import { Modal, Button, Space, Typography, Divider } from 'antd';
+import { PrinterOutlined } from '@ant-design/icons';
 import { useReactToPrint } from 'react-to-print';
 import { useDesignerStore } from '../store';
 import { PAPER_SIZES, MM_TO_PX_RATIO, DEFAULT_GRID_SETTINGS } from '../constants';
@@ -22,11 +22,6 @@ const PrintPreview: React.FC = () => {
   const gridSettings = useDesignerStore((s) => s.gridSettings) || DEFAULT_GRID_SETTINGS;
   const dataSources = useDesignerStore((s) => s.dataSources);
   const printRef = useRef<HTMLDivElement>(null);
-
-  // 预览时选择的 object 类型数据源
-  const [selectedObjDSId, setSelectedObjDSId] = useState<string | null>(null);
-  const objDataSources = dataSources.filter((ds) => ds.type === 'object');
-  const selectedObjDS = selectedObjDSId ? dataSources.find((ds) => ds.id === selectedObjDSId) : (objDataSources[0] || null);
 
   const pagePixel = useMemo(() => {
     const preset = PAPER_SIZES[pageSettings.paperSize as keyof typeof PAPER_SIZES];
@@ -73,7 +68,8 @@ const PrintPreview: React.FC = () => {
   // 获取渲染时的实际值（考虑数据绑定）
   const getRenderValue = (comp: any, field: string): string => {
     const binding = comp.props[`${field}Binding`];
-    if (binding && binding.dataSourceId && binding.fieldPath && selectedObjDS) {
+    // 直接使用组件绑定的数据源
+    if (binding && binding.dataSourceId && binding.fieldPath) {
       const ds = dataSources.find((d) => d.id === binding.dataSourceId);
       if (ds && ds.type === 'object') {
         const data = getObjectFromDataSource(ds);
@@ -108,10 +104,31 @@ const PrintPreview: React.FC = () => {
           borderCollapse: 'collapse',
         }}
       >
+        {/* 表头 */}
+        <thead>
+          <tr>
+            {cols.map((col: any, cIndex: number) => (
+              <th
+                key={cIndex}
+                style={{
+                  border: `${borderWidth}px solid ${borderColor}`,
+                  padding: 4,
+                  textAlign: 'center',
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  backgroundColor: '#f5f5f5',
+                }}
+              >
+                {col.title || `列${cIndex + 1}`}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        {/* 表体 */}
         <tbody>
           {displayData.map((row, rIndex) => (
             <tr key={rIndex}>
-              {cols.map((col, cIndex) => (
+              {cols.map((col: any, cIndex: number) => (
                 <td
                   key={cIndex}
                   style={{
@@ -121,7 +138,7 @@ const PrintPreview: React.FC = () => {
                     fontSize: 12,
                   }}
                 >
-                  {col.fieldPath ? getValueByPath(row, col.fieldPath) : (col.title || '')}
+                  {col.fieldPath ? getValueByPath(row, col.fieldPath) : ''}
                 </td>
               ))}
             </tr>
@@ -258,25 +275,6 @@ const PrintPreview: React.FC = () => {
       }
       styles={{ body: { padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center' } }}
     >
-      {/* 预览时的数据源选择 */}
-      {objDataSources.length > 0 && (
-        <div style={{ marginBottom: 12, width: '100%' }}>
-          <Alert
-            message="选择预览数据源"
-            description="选择一个对象类型数据源来预览模板"
-            type="info"
-            showIcon
-            style={{ marginBottom: 8 }}
-          />
-          <Select
-            style={{ width: '100%' }}
-            placeholder="选择一个对象数据源进行预览"
-            value={selectedObjDSId || (objDataSources.length > 0 ? objDataSources[0].id : '')}
-            onChange={(v) => setSelectedObjDSId(v)}
-            options={objDataSources.map((ds) => ({ label: ds.name, value: ds.id }))}
-          />
-        </div>
-      )}
       <Divider style={{ margin: '4px 0 12px 0' }} />
 
       <div

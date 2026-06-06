@@ -19,6 +19,8 @@ export interface TableColumnConfig {
   fieldPath?: string;
   /** 列宽（可选） */
   width?: number;
+  /** 是否可编辑 */
+  editable?: boolean;
 }
 
 /* ========== 画布上的组件实例（更新版本） ========== */
