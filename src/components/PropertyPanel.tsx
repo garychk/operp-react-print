@@ -200,6 +200,14 @@ const PropertyPanel: React.FC = () => {
     const parsedData = selectedDs ? getObjectFromDataSource(selectedDs) : null;
     const availableKeys = parsedData ? Object.keys(parsedData) : [];
 
+    // 用于 TextArea 和 Input 的临时状态
+    const [tempValue, setTempValue] = React.useState(cfg.staticValue);
+
+    // 当数据源改变时，重置临时值
+    React.useEffect(() => {
+      setTempValue(cfg.staticValue);
+    }, [cfg.staticValue, cfg.dataSourceId]);
+
     return (
       <div>
         <Text style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>{label}</Text>
@@ -242,14 +250,22 @@ const PropertyPanel: React.FC = () => {
             <TextArea
               rows={3}
               placeholder={placeholder}
-              value={cfg.staticValue}
-              onChange={(e) => handleBindingChange(field, null, '', e.target.value)}
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={() => {
+                // 失去焦点时保存
+                handleBindingChange(field, null, '', tempValue);
+              }}
             />
           ) : (
             <Input
               placeholder={placeholder}
-              value={cfg.staticValue}
-              onChange={(e) => handleBindingChange(field, null, '', e.target.value)}
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={() => {
+                // 失去焦点时保存
+                handleBindingChange(field, null, '', tempValue);
+              }}
             />
           )
         ) : (
@@ -283,6 +299,9 @@ const PropertyPanel: React.FC = () => {
 
     // 使用 tempColumns 或 columns
     const displayColumns = tempColumns.length > 0 ? tempColumns : columns;
+
+    // 临时存储正在编辑的列标题值，避免频繁更新状态
+    const [editingTitles, setEditingTitles] = React.useState<Record<string, string>>({});
 
     // 保存列配置
     const saveColumns = () => {
@@ -324,18 +343,33 @@ const PropertyPanel: React.FC = () => {
         dataIndex: 'title',
         width: 100,
         render: (_, record) => {
+          // 使用临时编辑值或原始值
+          const currentValue = record.key in editingTitles 
+            ? editingTitles[record.key] 
+            : record.title;
+          
           return (
             <Input
               size="small"
-              value={record.title}
+              value={currentValue}
               placeholder="列标题"
               onChange={(e) => {
-                // 只更新本地状态，不立即保存到 store
-                updateColumn(Number(record.key), 'title', e.target.value);
+                // 只更新临时状态，不立即保存
+                setEditingTitles({
+                  ...editingTitles,
+                  [record.key]: e.target.value,
+                });
               }}
               onBlur={() => {
-                // 失去焦点时再保存到 store
-                saveColumns();
+                // 失去焦点时才更新并保存
+                if (record.key in editingTitles) {
+                  updateColumn(Number(record.key), 'title', editingTitles[record.key]);
+                  // 清除临时值
+                  const newEditing = { ...editingTitles };
+                  delete newEditing[record.key];
+                  setEditingTitles(newEditing);
+                  saveColumns();
+                }
               }}
             />
           );
