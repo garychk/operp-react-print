@@ -8,6 +8,9 @@ import { PAPER_SIZES, MM_TO_PX_RATIO } from '../constants';
 import Barcode from './Barcode';
 import { getRenderValue, getObjectFromDataSource, getArrayFromDataSource } from '../utils/dataHelper';
 
+// 类型断言解决 react-grid-layout 类型兼容问题
+const GridLayoutComponent = GridLayout as any;
+
 /** 单个画布组件渲染 */
 const RenderComponent: React.FC<{
   comp: CanvasComp;
@@ -422,7 +425,7 @@ const Canvas: React.FC<{ isPreview?: boolean }> = ({ isPreview = false }) => {
               })}
             </div>
           ) : (
-            <GridLayout
+            <GridLayoutComponent
               className="canvas-grid"
               layout={layout}
               cols={gridSettings.cols}
@@ -450,7 +453,7 @@ const Canvas: React.FC<{ isPreview?: boolean }> = ({ isPreview = false }) => {
                   <RenderComponent comp={comp} selected={comp.id === selectedId} dataSources={dataSources} />
                 </div>
               ))}
-            </GridLayout>
+            </GridLayoutComponent>
           )}
         </div>
       </div>
