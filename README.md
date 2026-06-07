@@ -3,11 +3,11 @@
 ## 安装
 
 ```bash
-npm install @operp/print-designer
+npm install operp-print-designer
 # 或者
-yarn add @operp/print-designer
+yarn add operp-print-designer
 # 或者
-pnpm add @operp/print-designer
+pnpm add operp-print-designer
 ```
 
 ## 基本使用
@@ -15,7 +15,7 @@ pnpm add @operp/print-designer
 ### 1. 编辑模式
 
 ```tsx
-import PrintDesigner from '@operp/print-designer';
+import PrintDesigner from 'operp-print-designer';
 
 function Editor() {
   return (
@@ -35,7 +35,7 @@ function Editor() {
 ### 2. 预览模式
 
 ```tsx
-import PrintDesigner from '@operp/print-designer';
+import PrintDesigner from 'operp-print-designer';
 
 function Previewer() {
   return (
@@ -113,7 +113,7 @@ interface TableColumnConfig {
 
 ```tsx
 import { useState } from 'react';
-import PrintDesigner, { TemplateData } from '@operp/print-designer';
+import PrintDesigner, { TemplateData } from 'operp-print-designer';
 
 function App() {
   const [templateData, setTemplateData] = useState<TemplateData | undefined>();
@@ -143,7 +143,7 @@ function App() {
 ### 带数据绑定的示例
 
 ```tsx
-import PrintDesigner, { TemplateData } from '@operp/print-designer';
+import PrintDesigner, { TemplateData } from 'operp-print-designer';
 
 function Example() {
   // 定义包含数据源的模板数据
@@ -204,7 +204,7 @@ function Example() {
 ### 表格数据绑定示例
 
 ```tsx
-import PrintDesigner, { TemplateData } from '@operp/print-designer';
+import PrintDesigner, { TemplateData } from 'operp-print-designer';
 
 function TableExample() {
   const templateData: TemplateData = {
@@ -264,7 +264,7 @@ function TableExample() {
 如果需要导入全局样式（可选，因为组件内置了必要的样式）：
 
 ```tsx
-import '@operp/print-designer/dist/index.css';
+import 'operp-print-designer/dist/index.css';
 ```
 
 ## 注意事项
