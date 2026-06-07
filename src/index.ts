@@ -1,5 +1,9 @@
-// 导出主要组件
-export { default as PrintDesigner } from './components/PrintDesigner';
+// 默认导出，方便用户使用 import PrintDesigner from 'operp-print-designer'
+import PrintDesigner from './components/PrintDesigner';
+export default PrintDesigner;
+
+// 命名导出
+export { PrintDesigner };
 
 // 导出类型定义
 export type { PrintDesignerProps } from './components/PrintDesigner';
@@ -28,7 +32,3 @@ export {
 
 // 导出 store hook
 export { useDesignerStore } from './store';
-
-// 导入组件样式（react-grid-layout 需要）
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';

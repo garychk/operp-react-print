@@ -1,27 +1,29 @@
 {
   "name": "operp-print-designer",
   "private": false,
-  "version": "1.0.1",
+  "version": "1.0.8",
   "type": "module",
   "description": "一个功能强大的打印模板设计器组件，支持拖拽、数据绑定和打印预览",
-  "main": "./dist/print-designer.umd.js",
-  "module": "./dist/print-designer.es.js",
+  "main": "./dist/operp-print-designer.umd.js",
+  "module": "./dist/operp-print-designer.es.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "exports": {
     ".": {
-      "import": "./dist/print-designer.es.js",
-      "require": "./dist/print-designer.umd.js",
+      "import": "./dist/operp-print-designer.es.js",
+      "require": "./dist/operp-print-designer.umd.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./dist/operp-print-designer.css": "./dist/operp-print-designer.css"
   },
+  "style": "./dist/operp-print-designer.css",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "build:lib": "vite build"
+    "build:lib": "tsc -p tsconfig.lib.json && vite build"
   },
   "keywords": [
     "print",
