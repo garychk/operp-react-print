@@ -1,4 +1,4 @@
-import { DataSource, TableColumnConfig } from '../types';
+import { DataSource, TableColumnConfig, CanvasComponent } from '../types';
 
 /**
  * 安全解析 JSON 字符串
@@ -9,6 +9,39 @@ export function safeParseJSON(jsonStr: string): any {
   } catch {
     return null;
   }
+}
+
+/**
+ * 获取组件属性的渲染值（支持数据绑定）
+ */
+export function getRenderValue(
+  comp: CanvasComponent,
+  propName: string,
+  dataSources: DataSource[]
+): string {
+  // 尝试查找绑定配置
+  const bindingKey = `${propName}Binding`;
+  const binding = comp.props[bindingKey] as any;
+  
+  if (binding && binding.dataSourceId && binding.fieldPath) {
+    // 查找数据源
+    const dataSource = dataSources.find((ds) => ds.id === binding.dataSourceId);
+    if (dataSource) {
+      // 解析数据源数据
+      const data = getObjectFromDataSource(dataSource);
+      if (data) {
+        // 获取字段值
+        const value = getValueByPath(data, binding.fieldPath);
+        if (value) {
+          return value;
+        }
+      }
+    }
+  }
+  
+  // 如果没有绑定或绑定失败，返回静态值
+  const staticValue = (comp.props[propName] as string) || (binding?.staticValue as string) || '';
+  return staticValue;
 }
 
 /**

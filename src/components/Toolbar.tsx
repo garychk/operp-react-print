@@ -7,12 +7,21 @@ import {
   DownloadOutlined,
   UploadOutlined,
   PlusOutlined,
+  SaveOutlined,
+  PrinterOutlined,
 } from '@ant-design/icons';
 import { useDesignerStore } from '../store';
 
 const { Text } = Typography;
 
-const Toolbar: React.FC = () => {
+interface ToolbarProps {
+  /** 自定义保存回调 */
+  onCustomSave?: () => void;
+  /** 自定义打印回调 */
+  onCustomPrint?: () => void;
+}
+
+const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
   const templateName = useDesignerStore((s) => s.templateName);
   const setTemplateName = useDesignerStore((s) => s.setTemplateName);
   const setPreviewVisible = useDesignerStore((s) => s.setPreviewVisible);
@@ -105,9 +114,15 @@ const Toolbar: React.FC = () => {
           style={{ display: 'none' }}
           onChange={handleImport}
         />
-        <Button icon={<DownloadOutlined />} onClick={handleExport}>
-          导出
-        </Button>
+        {onCustomSave ? (
+          <Button icon={<SaveOutlined />} onClick={onCustomSave} type="primary">
+            保存
+          </Button>
+        ) : (
+          <Button icon={<DownloadOutlined />} onClick={handleExport}>
+            导出
+          </Button>
+        )}
         <Button icon={<UploadOutlined />} onClick={handleImportClick}>
           导入
         </Button>
@@ -125,13 +140,23 @@ const Toolbar: React.FC = () => {
         >
           删除
         </Button>
-        <Button
-          type="primary"
-          icon={<EyeOutlined />}
-          onClick={() => setPreviewVisible(true)}
-        >
-          预览
-        </Button>
+        {onCustomPrint ? (
+          <Button
+            type="primary"
+            icon={<PrinterOutlined />}
+            onClick={onCustomPrint}
+          >
+            打印
+          </Button>
+        ) : (
+          <Button
+            type="primary"
+            icon={<EyeOutlined />}
+            onClick={() => setPreviewVisible(true)}
+          >
+            预览
+          </Button>
+        )}
       </Space>
     </div>
   );

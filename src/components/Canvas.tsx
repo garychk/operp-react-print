@@ -3,91 +3,103 @@ import GridLayout, { Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { useDesignerStore } from '../store';
-import { CanvasComponent as CanvasComp, CanvasComponentType } from '../types';
+import { CanvasComponent as CanvasComp, CanvasComponentType, DataSource, DataBindingConfig } from '../types';
 import { PAPER_SIZES, MM_TO_PX_RATIO } from '../constants';
 import Barcode from './Barcode';
+import { getRenderValue, getObjectFromDataSource, getArrayFromDataSource } from '../utils/dataHelper';
 
 /** 单个画布组件渲染 */
-const RenderComponent: React.FC<{ comp: CanvasComp; selected: boolean }> = React.memo(
-  ({ comp, selected }) => {
-    const style: React.CSSProperties = {
-      width: '100%',
-      height: '100%',
-      overflow: 'hidden',
-      boxSizing: 'border-box',
-      outline: selected ? '2px solid #1677ff' : '1px dashed #d9d9d9',
-      outlineOffset: -1,
-    };
+const RenderComponent: React.FC<{
+  comp: CanvasComp;
+  selected: boolean;
+  isPreview?: boolean;
+  dataSources?: DataSource[];
+}> = React.memo(({ comp, selected, isPreview = false, dataSources = [] }) => {
+  const style: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    boxSizing: 'border-box',
+    outline: isPreview ? 'none' : (selected ? '2px solid #1677ff' : '1px dashed #d9d9d9'),
+    outlineOffset: -1,
+  };
 
-    switch (comp.type) {
-      case 'text':
-        return (
-          <div
-            style={{
-              ...style,
-              fontSize: (comp.props.fontSize as number) || 14,
-              fontWeight: (comp.props.fontWeight as React.CSSProperties['fontWeight']) || 'normal',
-              fontStyle: (comp.props.fontStyle as React.CSSProperties['fontStyle']) || 'normal',
-              textAlign: (comp.props.textAlign as React.CSSProperties['textAlign']) || 'left',
-              color: (comp.props.color as string) || '#000',
-              backgroundColor: (comp.props.backgroundColor as string) || 'transparent',
-              padding: 4,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-            }}
-          >
-            {(comp.props.content as string) || ''}
-          </div>
-        );
-      case 'image':
-        return (
-          <div style={style}>
-            {comp.props.src ? (
-              <img
-                src={comp.props.src as string}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: (comp.props.fit as React.CSSProperties['objectFit']) || 'contain',
-                }}
-                alt=""
-              />
-            ) : (
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#bbb',
-                  fontSize: 12,
-                }}
-              >
-                请在属性中设置图片地址
-              </div>
-            )}
-          </div>
-        );
-      case 'table':
-        return <TableRenderer comp={comp} style={style} />;
-      case 'barcode':
-        return (
-          <div
-            style={{
-              ...style,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 4,
-            }}
-          >
-            <Barcode
-              value={(comp.props.value as string) || '123456'}
-              format={(comp.props.format as string) || 'CODE128'}
+  // 辅助函数：获取组件属性的绑定值
+  const getBoundValue = (propName: string): string => {
+    return getRenderValue(comp, propName, dataSources);
+  };
+
+  switch (comp.type) {
+    case 'text':
+      return (
+        <div
+          style={{
+            ...style,
+            fontSize: (comp.props.fontSize as number) || 14,
+            fontWeight: (comp.props.fontWeight as React.CSSProperties['fontWeight']) || 'normal',
+            fontStyle: (comp.props.fontStyle as React.CSSProperties['fontStyle']) || 'normal',
+            textAlign: (comp.props.textAlign as React.CSSProperties['textAlign']) || 'left',
+            color: (comp.props.color as string) || '#000',
+            backgroundColor: (comp.props.backgroundColor as string) || 'transparent',
+            padding: 4,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          {getBoundValue('content') || ''}
+        </div>
+      );
+    case 'image':
+      const imageSrc = getBoundValue('src') || (comp.props.src as string);
+      return (
+        <div style={style}>
+          {imageSrc ? (
+            <img
+              src={imageSrc}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: (comp.props.fit as React.CSSProperties['objectFit']) || 'contain',
+              }}
+              alt=""
             />
-          </div>
-        );
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#bbb',
+                fontSize: 12,
+              }}
+            >
+              请在属性中设置图片地址
+            </div>
+          )}
+        </div>
+      );
+    case 'table':
+      return <TableRenderer comp={comp} style={style} dataSources={dataSources} />;
+    case 'barcode':
+      const barcodeValue = getBoundValue('value') || (comp.props.value as string) || '123456';
+      return (
+        <div
+          style={{
+            ...style,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 4,
+          }}
+        >
+          <Barcode
+            value={barcodeValue}
+            format={(comp.props.format as string) || 'CODE128'}
+          />
+        </div>
+      );
       case 'line':
         return (
           <div
@@ -116,11 +128,75 @@ const RenderComponent: React.FC<{ comp: CanvasComp; selected: boolean }> = React
 );
 
 /** 简易表格渲染 */
-const TableRenderer: React.FC<{ comp: CanvasComp; style: React.CSSProperties }> = ({ comp, style }) => {
-  const rows = (comp.props.rows as number) || 3;
-  const cols = (comp.props.cols as number) || 3;
+const TableRenderer: React.FC<{ comp: CanvasComp; style: React.CSSProperties; dataSources?: DataSource[] }> = ({ comp, style, dataSources = [] }) => {
   const borderWidth = (comp.props.borderWidth as number) || 1;
   const borderColor = (comp.props.borderColor as string) || '#000';
+  const tableColumns = comp.tableColumns || [];
+  
+  // 尝试查找绑定的数组数据源
+  const dataSourceId = comp.props.tableDataSourceId as string | undefined;
+  const selectedDs = dataSourceId ? dataSources.find(d => d.id === dataSourceId) : null;
+  const tableData = selectedDs ? getArrayFromDataSource(selectedDs) : null;
+  
+  // 如果有数组数据源，则渲染动态数据
+  if (tableData && tableData.length > 0) {
+    return (
+      <table
+        style={{
+          ...style,
+          borderCollapse: 'collapse',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        {/* 表头 */}
+        {tableColumns.length > 0 && (
+          <thead>
+            <tr style={{ backgroundColor: '#f5f5f5' }}>
+              {tableColumns.map((col, i) => (
+                <th
+                  key={i}
+                  style={{
+                    border: `${borderWidth}px solid ${borderColor}`,
+                    padding: 4,
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                  }}
+                >
+                  {col.title}
+                </th>
+              ))}
+            </tr>
+          </thead>
+        )}
+        {/* 表体 */}
+        <tbody>
+          {tableData.map((row, r) => (
+            <tr key={r}>
+              {tableColumns.map((col, c) => (
+                <td
+                  key={c}
+                  style={{
+                    border: `${borderWidth}px solid ${borderColor}`,
+                    padding: 4,
+                    fontSize: 12,
+                    textAlign: 'center',
+                  }}
+                >
+                  {col.fieldPath ? (row as any)[col.fieldPath] : ''}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
+  // 否则渲染静态表格
+  const rows = (comp.props.rows as number) || 3;
+  const cols = Math.max((comp.props.cols as number) || 3, tableColumns.length || 3);
 
   return (
     <table
@@ -154,7 +230,7 @@ const TableRenderer: React.FC<{ comp: CanvasComp; style: React.CSSProperties }> 
   );
 };
 
-const Canvas: React.FC = () => {
+const Canvas: React.FC<{ isPreview?: boolean }> = ({ isPreview = false }) => {
   const components = useDesignerStore((s) => s.components);
   const selectedId = useDesignerStore((s) => s.selectedId);
   const pageSettings = useDesignerStore((s) => s.pageSettings);
@@ -163,6 +239,7 @@ const Canvas: React.FC = () => {
   const setComponents = useDesignerStore((s) => s.setComponents);
   const addComponent = useDesignerStore((s) => s.addComponent);
   const gridSettings = useDesignerStore((s) => s.gridSettings);
+  const dataSources = useDesignerStore((s) => s.dataSources);
 
   // 计算纸张像素尺寸
   const pagePixel = useMemo(() => {
@@ -322,35 +399,59 @@ const Canvas: React.FC = () => {
             height: canvasH,
           }}
         >
-          <GridLayout
-            className="canvas-grid"
-            layout={layout}
-            cols={gridSettings.cols}
-            rowHeight={canvasW / gridSettings.cols}
-            width={canvasW}
-            margin={[0, 0]}
-            containerPadding={[0, 0]}
-            onLayoutChange={handleLayoutChange}
-            onDrop={handleDrop}
-            isDroppable
-            isResizable
-            isDraggable
-            compactType={null}
-            preventCollision
-            draggableHandle=".grid-item-drag-handle"
-            style={{ minHeight: canvasH }}
-          >
-            {components.map((comp) => (
-              <div
-                key={comp.id}
-                className="grid-item-drag-handle"
-                onClick={() => handleSelect(comp.id)}
-                style={{ cursor: 'move' }}
-              >
-                <RenderComponent comp={comp} selected={comp.id === selectedId} />
-              </div>
-            ))}
-          </GridLayout>
+          {isPreview ? (
+            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+              {components.map((comp) => {
+                // 计算网格单元尺寸
+                const cellW = canvasW / gridSettings.cols;
+                const cellH = canvasW / gridSettings.cols;
+                
+                const style: React.CSSProperties = {
+                  position: 'absolute',
+                  left: comp.x * cellW,
+                  top: comp.y * cellH,
+                  width: comp.w * cellW,
+                  height: comp.h * cellH,
+                };
+                
+                return (
+                  <div key={comp.id} style={style}>
+                    <RenderComponent comp={comp} selected={false} isPreview dataSources={dataSources} />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <GridLayout
+              className="canvas-grid"
+              layout={layout}
+              cols={gridSettings.cols}
+              rowHeight={canvasW / gridSettings.cols}
+              width={canvasW}
+              margin={[0, 0]}
+              containerPadding={[0, 0]}
+              onLayoutChange={handleLayoutChange}
+              onDrop={handleDrop}
+              isDroppable
+              isResizable
+              isDraggable
+              compactType={null}
+              preventCollision
+              draggableHandle=".grid-item-drag-handle"
+              style={{ minHeight: canvasH }}
+            >
+              {components.map((comp) => (
+                <div
+                  key={comp.id}
+                  className="grid-item-drag-handle"
+                  onClick={() => handleSelect(comp.id)}
+                  style={{ cursor: 'move' }}
+                >
+                  <RenderComponent comp={comp} selected={comp.id === selectedId} dataSources={dataSources} />
+                </div>
+              ))}
+            </GridLayout>
+          )}
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ export interface DataBinding {
   staticValue: string;
 }
 
+export type DataBindingConfig = DataBinding;
+
 /* ========== 表格列配置 ========== */
 export interface TableColumnConfig {
   /** 列标题 */

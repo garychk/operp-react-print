@@ -1,21 +1,50 @@
 {
-  "name": "operp-react-print",
-  "private": true,
+  "name": "@operp/print-designer",
+  "private": false,
   "version": "1.0.0",
   "type": "module",
+  "description": "一个功能强大的打印模板设计器组件，支持拖拽、数据绑定和打印预览",
+  "main": "./dist/print-designer.umd.js",
+  "module": "./dist/print-designer.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/print-designer.es.js",
+      "require": "./dist/print-designer.umd.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:lib": "vite build"
+  },
+  "keywords": [
+    "print",
+    "designer",
+    "template",
+    "react",
+    "print-designer",
+    "label-designer"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "antd": ">=5.0.0",
+    "@ant-design/icons": ">=5.0.0",
+    "react-grid-layout": ">=1.5.0",
+    "react-to-print": ">=3.0.0",
+    "zustand": ">=5.0.0"
   },
   "dependencies": {
-    "antd": "^5.22.0",
-    "@ant-design/icons": "^5.5.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "react-grid-layout": "^1.5.0",
-    "react-to-print": "^3.0.2",
-    "zustand": "^5.0.0"
+    "react-resizable": "^3.0.5"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
