@@ -180,7 +180,7 @@ const DataSourcePanel: React.FC = () => {
           >
             <List.Item.Meta
               avatar={<DatabaseOutlined />}
-              title={<Text strong>{ds.name}</Text>}
+              title={<Text ellipsis  strong>{ds.name}</Text>}
               description={
                 <Space size={4}>
                   <Tag color={ds.type === "object" ? "blue" : "green"}>
