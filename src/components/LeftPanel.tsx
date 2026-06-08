@@ -9,7 +9,8 @@ const LeftPanel: React.FC = () => {
   return (
     <Collapse
       bordered={false}
-      defaultActiveKey={['1', '2']}
+      accordion 
+      defaultActiveKey={['1']}
       expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
       style={{ height: '100%', overflowY: 'auto' }}
       items={[
