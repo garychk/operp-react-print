@@ -1,6 +1,13 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { App as AntApp, Button, Space } from 'antd';
-import { PrinterOutlined } from '@ant-design/icons';
+import {
+  LeftOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  PrinterOutlined,
+  RightOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 import { useReactToPrint } from 'react-to-print';
 import Toolbar from '../Toolbar';
 import LeftPanel from '../LeftPanel';
@@ -40,6 +47,8 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
 }) => {
   const { importJSON, exportJSON, reset, components, pageSettings, gridSettings, dataSources } = useDesignerStore();
   const printRef = useRef<HTMLDivElement>(null);
+  const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
 
   // 初始化数据
   useEffect(() => {
@@ -450,16 +459,54 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
         {/* 主体三栏布局 */}
         <div className="app-body">
           {/* 左侧面板 */}
-          <div className="app-left-panel">
-            <LeftPanel />
+          <div className={`app-left-panel ${leftCollapsed ? 'collapsed' : ''}`}>
+            {leftCollapsed ? (
+              <Button
+                type="text"
+                className="panel-collapsed-trigger"
+                icon={<MenuUnfoldOutlined />}
+                onClick={() => setLeftCollapsed(false)}
+                title="展开左侧面板"
+              />
+            ) : (
+              <>
+                <Button
+                  type="text"
+                  className="panel-collapse-trigger panel-collapse-trigger-left"
+                  icon={<MenuFoldOutlined />}
+                  onClick={() => setLeftCollapsed(true)}
+                  title="折叠左侧面板"
+                />
+                <LeftPanel />
+              </>
+            )}
           </div>
 
           {/* 中间画布 */}
           <Canvas />
 
           {/* 右侧属性面板 */}
-          <div className="app-right-panel">
-            <PropertyPanel />
+          <div className={`app-right-panel ${rightCollapsed ? 'collapsed' : ''}`}>
+            {rightCollapsed ? (
+              <Button
+                type="text"
+                className="panel-collapsed-trigger"
+                icon={<MenuFoldOutlined />}
+                onClick={() => setRightCollapsed(false)}
+                title="展开属性面板"
+              />
+            ) : (
+              <>
+                <Button
+                  type="text"
+                  className="panel-collapse-trigger panel-collapse-trigger-right"
+                  icon={<MenuUnfoldOutlined />}
+                  onClick={() => setRightCollapsed(true)}
+                  title="折叠属性面板"
+                />
+                <PropertyPanel />
+              </>
+            )}
           </div>
         </div>
 

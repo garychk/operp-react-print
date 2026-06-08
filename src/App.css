@@ -29,6 +29,7 @@ html, body, #root {
 
 /* ===== 左侧面板 ===== */
 .app-left-panel {
+  position: relative;
   width: 240px;
   min-width: 220px;
   display: flex;
@@ -36,6 +37,7 @@ html, body, #root {
   border-right: 1px solid #e8e8e8;
   background: #fff;
   overflow: hidden;
+  transition: width 0.2s ease, min-width 0.2s ease;
 }
 
 .app-left-top {
@@ -49,11 +51,48 @@ html, body, #root {
 
 /* ===== 右侧属性面板 ===== */
 .app-right-panel {
+  position: relative;
   width: 260px;
   min-width: 260px;
+  display: flex;
+  flex-direction: column;
   border-left: 1px solid #e8e8e8;
   background: #fff;
   overflow: auto;
+  transition: width 0.2s ease, min-width 0.2s ease;
+}
+
+.app-left-panel.collapsed,
+.app-right-panel.collapsed {
+  width: 40px;
+  min-width: 40px;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.panel-collapse-trigger {
+  position: absolute;
+  top: 8px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  padding: 0;  
+}
+
+.panel-collapse-trigger-left {
+  right: 8px;
+}
+
+.panel-collapse-trigger-right {
+  right: 8px;
+}
+
+.panel-collapsed-trigger {
+  width: 32px;
+  height: 32px;
+  margin-top: 8px;
+  padding: 0;
 }
 
 /* ===== Canvas 网格样式 ===== */
