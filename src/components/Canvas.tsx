@@ -6,6 +6,7 @@ import { useDesignerStore } from '../store';
 import { CanvasComponent as CanvasComp, CanvasComponentType, DataSource, DataBindingConfig } from '../types';
 import { PAPER_SIZES, MM_TO_PX_RATIO } from '../constants';
 import Barcode from './Barcode';
+import QRCode from './QRCode';
 import { getRenderValue, getObjectFromDataSource, getArrayFromDataSource } from '../utils/dataHelper';
 
 // 类型断言解决 react-grid-layout 类型兼容问题
@@ -100,6 +101,26 @@ const RenderComponent: React.FC<{
           <Barcode
             value={barcodeValue}
             format={(comp.props.format as string) || 'CODE128'}
+          />
+        </div>
+      );
+    case 'qrcode':
+      const qrcodeValue = getBoundValue('value') || (comp.props.value as string) || 'https://example.com';
+      return (
+        <div
+          style={{
+            ...style,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 4,
+          }}
+        >
+          <QRCode
+            value={qrcodeValue}
+            errorLevel={(comp.props.errorLevel as 'L' | 'M' | 'Q' | 'H') || 'M'}
+            color={(comp.props.color as string) || '#000000'}
+            backgroundColor={(comp.props.backgroundColor as string) || '#ffffff'}
           />
         </div>
       );

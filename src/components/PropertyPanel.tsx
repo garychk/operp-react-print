@@ -589,6 +589,44 @@ const PropertyPanel: React.FC = () => {
             />
           </>
         );
+      case 'qrcode':
+        return (
+          <>
+            <RenderDataBindingEditor field="value" label="二维码内容" placeholder="输入二维码内容" />
+            <Divider style={{ margin: '4px 0' }} />
+            <Text style={{ fontSize: 12, marginTop: 8, display: 'block' }}>纠错级别</Text>
+            <Select
+              size="small"
+              style={{ width: '100%' }}
+              value={(comp.props.errorLevel as string) || 'M'}
+              onChange={(v) => handlePropChange('errorLevel', v)}
+              options={[
+                { value: 'L', label: 'L - 低' },
+                { value: 'M', label: 'M - 中' },
+                { value: 'Q', label: 'Q - 较高' },
+                { value: 'H', label: 'H - 高' },
+              ]}
+            />
+            <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+              <div>
+                <Text style={{ fontSize: 12 }}>前景色</Text>
+                <ColorPicker
+                  size="small"
+                  value={(comp.props.color as string) || '#000000'}
+                  onChange={(_, hex) => handlePropChange('color', hex)}
+                />
+              </div>
+              <div>
+                <Text style={{ fontSize: 12 }}>背景色</Text>
+                <ColorPicker
+                  size="small"
+                  value={(comp.props.backgroundColor as string) || '#ffffff'}
+                  onChange={(_, hex) => handlePropChange('backgroundColor', hex)}
+                />
+              </div>
+            </div>
+          </>
+        );
       case 'line':
         return (
           <>

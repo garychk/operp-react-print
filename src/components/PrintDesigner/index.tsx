@@ -12,6 +12,7 @@ import { useDesignerStore } from '../../store';
 import { TemplateData } from '../../types';
 import { PAPER_SIZES, MM_TO_PX_RATIO, DEFAULT_GRID_SETTINGS } from '../../constants';
 import Barcode from '../Barcode';
+import QRCode from '../QRCode';
 import {
   safeParseJSON,
   getValueByPath,
@@ -195,6 +196,27 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
               <Barcode
                 value={getRenderValue(comp, 'value', dataSources)}
                 format={(p.format as string) || 'CODE128'}
+              />
+            </div>
+          </div>
+        );
+      case 'qrcode':
+        return (
+          <div key={comp.id} style={containerStyle}>
+            <div
+              style={{
+                ...baseStyle,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 4,
+              }}
+            >
+              <QRCode
+                value={getRenderValue(comp, 'value', dataSources)}
+                errorLevel={(p.errorLevel as 'L' | 'M' | 'Q' | 'H') || 'M'}
+                color={(p.color as string) || '#000000'}
+                backgroundColor={(p.backgroundColor as string) || '#ffffff'}
               />
             </div>
           </div>

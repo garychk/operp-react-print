@@ -42,6 +42,7 @@ export const COMPONENT_TYPE_LABELS: Record<string, string> = {
   image: '图片',
   table: '表格',
   barcode: '条形码',
+  qrcode: '二维码',
   line: '分割线',
 };
 
@@ -71,6 +72,13 @@ export const COMPONENT_DEFAULTS = {
   barcode: {
     value: '1234567890',
     format: 'CODE128' as const,
+    content: '',
+  },
+  qrcode: {
+    value: 'https://example.com',
+    errorLevel: 'M' as const,
+    color: '#000000',
+    backgroundColor: '#ffffff',
     content: '',
   },
   line: {

@@ -92,8 +92,8 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
       type,
       x: x ?? 0,
       y: y ?? 0,
-      w: type === 'line' ? 20 : 15,
-      h: type === 'line' ? 1 : 8,
+      w: type === 'line' ? 20 : type === 'qrcode' ? 12 : 15,
+      h: type === 'line' ? 1 : type === 'qrcode' ? 12 : 8,
       props: defaults,
       ...(type === 'table' ? { tableColumns: [{ title: '列1' }, { title: '列2' }, { title: '列3' }] } : {}),
     };

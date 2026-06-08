@@ -1,5 +1,5 @@
 /* ========== 画布组件类型 ========== */
-export type CanvasComponentType = 'text' | 'image' | 'table' | 'barcode' | 'line';
+export type CanvasComponentType = 'text' | 'image' | 'table' | 'barcode' | 'qrcode' | 'line';
 
 /* ========== 数据绑定类型 ========== */
 export interface DataBinding {

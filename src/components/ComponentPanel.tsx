@@ -5,6 +5,7 @@ import {
   PictureOutlined,
   TableOutlined,
   BarcodeOutlined,
+  QrcodeOutlined,
   MinusOutlined,
 } from '@ant-design/icons';
 import { useDesignerStore } from '../store';
@@ -24,6 +25,7 @@ const items: ComponentItem[] = [
   { type: 'image', icon: <PictureOutlined />, label: '图片' },
   { type: 'table', icon: <TableOutlined />, label: '表格' },
   { type: 'barcode', icon: <BarcodeOutlined />, label: '条形码' },
+  { type: 'qrcode', icon: <QrcodeOutlined />, label: '二维码' },
   { type: 'line', icon: <MinusOutlined />, label: '分割线' },
 ];
 

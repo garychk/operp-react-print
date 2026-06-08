@@ -89,7 +89,7 @@ interface DataSource {
 ### CanvasComponent
 
 ```typescript
-type CanvasComponentType = 'text' | 'image' | 'table' | 'barcode' | 'line';
+type CanvasComponentType = 'text' | 'image' | 'table' | 'barcode' | 'qrcode' | 'line';
 
 interface CanvasComponent {
   id: string;
@@ -276,7 +276,7 @@ import 'operp-print-designer/dist/index.css';
 2. **TypeScript**: 该库使用 TypeScript 编写，自带类型定义。
 
 3. **数据绑定**: 数据源支持对象和数组两种类型：
-   - **对象类型**: 适用于文本、条码、图片等组件的数据绑定
+   - **对象类型**: 适用于文本、图片、条码、二维码等组件的数据绑定
    - **数组类型**: 适用于表格组件的数据绑定
 
 4. **预览模式**: 当 `isPreview` 为 `true` 时，组件处于只读模式，用户不能编辑模板，只能预览和打印。
