@@ -12,18 +12,18 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/operp-print-designer.es.js",
-      "require": "./dist/operp-print-designer.umd.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/operp-print-designer.umd.js"      
     },
     "./dist/operp-print-designer.css": "./dist/operp-print-designer.css"
   },
   "style": "./dist/operp-print-designer.css",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build && tsc -p tsconfig.lib.json",
     "preview": "vite preview",
-    "build:lib": "tsc -p tsconfig.lib.json && vite build"
+    "build:lib": "vite build && tsc -p tsconfig.lib.json"
   },
   "keywords": [
     "print",
