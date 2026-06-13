@@ -3,6 +3,7 @@ import { Modal, Button, Space, Typography, Divider } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import { useReactToPrint } from 'react-to-print';
 import { useDesignerStore } from '../store';
+import { DataSource } from '../types';
 import { PAPER_SIZES, MM_TO_PX_RATIO, DEFAULT_GRID_SETTINGS } from '../constants';
 import Barcode from './Barcode';
 import QRCode from './QRCode';
@@ -15,13 +16,14 @@ import {
 
 const { Text } = Typography;
 
-const PrintPreview: React.FC = () => {
+const PrintPreview: React.FC<{ dataSources?: DataSource[] }> = ({ dataSources: dataSourcesProp }) => {
   const previewVisible = useDesignerStore((s) => s.previewVisible);
   const setPreviewVisible = useDesignerStore((s) => s.setPreviewVisible);
   const components = useDesignerStore((s) => s.components);
   const pageSettings = useDesignerStore((s) => s.pageSettings);
   const gridSettings = useDesignerStore((s) => s.gridSettings) || DEFAULT_GRID_SETTINGS;
-  const dataSources = useDesignerStore((s) => s.dataSources);
+  const storeDataSources = useDesignerStore((s) => s.dataSources);
+  const dataSources = dataSourcesProp || storeDataSources;
   const printRef = useRef<HTMLDivElement>(null);
 
   const pagePixel = useMemo(() => {

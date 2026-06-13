@@ -16,7 +16,7 @@ import PropertyPanel from '../PropertyPanel';
 import PrintPreview from '../PrintPreview';
 import HeaderFooterDialog from '../HeaderFooterDialog';
 import { useDesignerStore } from '../../store';
-import { TemplateData } from '../../types';
+import { DataSource, PrintDesignerDataSource, TemplateData } from '../../types';
 import { PAPER_SIZES, MM_TO_PX_RATIO, DEFAULT_GRID_SETTINGS } from '../../constants';
 import Barcode from '../Barcode';
 import QRCode from '../QRCode';
@@ -33,6 +33,8 @@ export interface PrintDesignerProps {
   isPreview?: boolean;
   /** 初始模板数据 */
   initialTemplateData?: TemplateData;
+  /** 外部数据源。传入后优先于设计器内部数据源用于渲染和打印 */
+  dataSource?: PrintDesignerDataSource;
   /** 保存回调 */
   onSave?: (templateData: TemplateData) => void;
   /** 打印回调 */
@@ -42,6 +44,7 @@ export interface PrintDesignerProps {
 const PrintDesigner: React.FC<PrintDesignerProps> = ({
   isPreview = false,
   initialTemplateData,
+  dataSource,
   onSave,
   onPrint,
 }) => {
@@ -103,6 +106,53 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
   const canvasW = pagePixel.width - marginPx.left - marginPx.right;
   const cellSize = canvasW / (gridSettings?.cols || DEFAULT_GRID_SETTINGS.cols);
 
+  const resolvedDataSources = useMemo<DataSource[]>(() => {
+    if (!dataSource) {
+      return dataSources;
+    }
+
+    const hasData = dataSource.data && typeof dataSource.data === 'object';
+    const hasList = Array.isArray(dataSource.list);
+    const objectJson = hasData ? JSON.stringify(dataSource.data) : null;
+    const listJson = hasList ? JSON.stringify(dataSource.list) : null;
+    let objectApplied = false;
+    let listApplied = false;
+
+    const merged = dataSources.map((ds) => {
+      if (ds.type === 'object' && objectJson !== null) {
+        objectApplied = true;
+        return { ...ds, data: objectJson };
+      }
+      if (ds.type === 'array' && listJson !== null) {
+        listApplied = true;
+        return { ...ds, data: listJson };
+      }
+      return ds;
+    });
+
+    if (objectJson !== null && !objectApplied) {
+      merged.push({
+        id: 'external_data',
+        name: '外部对象数据',
+        type: 'object',
+        data: objectJson,
+        createdAt: 0,
+      });
+    }
+
+    if (listJson !== null && !listApplied) {
+      merged.push({
+        id: 'external_list',
+        name: '外部列表数据',
+        type: 'array',
+        data: listJson,
+        createdAt: 0,
+      });
+    }
+
+    return merged;
+  }, [dataSource, dataSources]);
+
   const handlePrintInternal = useReactToPrint({
     contentRef: printRef,
     documentTitle: '打印模板',
@@ -162,7 +212,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
                 wordBreak: 'break-word',
               }}
             >
-              {getRenderValue(comp, 'content', dataSources)}
+              {getRenderValue(comp, 'content', resolvedDataSources)}
             </div>
           </div>
         );
@@ -172,7 +222,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
             <div style={baseStyle}>
               {p.src ? (
                 <img
-                  src={getRenderValue(comp, 'src', dataSources)}
+                  src={getRenderValue(comp, 'src', resolvedDataSources)}
                   style={{
                     width: '100%',
                     height: '100%',
@@ -203,7 +253,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
               }}
             >
               <Barcode
-                value={getRenderValue(comp, 'value', dataSources)}
+                value={getRenderValue(comp, 'value', resolvedDataSources)}
                 format={(p.format as string) || 'CODE128'}
               />
             </div>
@@ -222,7 +272,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
               }}
             >
               <QRCode
-                value={getRenderValue(comp, 'value', dataSources)}
+                value={getRenderValue(comp, 'value', resolvedDataSources)}
                 errorLevel={(p.errorLevel as 'L' | 'M' | 'Q' | 'H') || 'M'}
                 color={(p.color as string) || '#000000'}
                 backgroundColor={(p.backgroundColor as string) || '#ffffff'}
@@ -260,7 +310,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
   // 表格数据渲染
   const renderTableData = (comp: any) => {
     const tableDSId = comp.props.tableDataSourceId;
-    const ds = tableDSId ? dataSources.find((d) => d.id === tableDSId) : null;
+    const ds = tableDSId ? resolvedDataSources.find((d) => d.id === tableDSId) : null;
     const data = ds ? getArrayFromDataSource(ds) : null;
     const cols = comp.tableColumns || [];
     const borderWidth = (comp.props.borderWidth as number) || 1;
@@ -373,7 +423,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
           {/* 预览区域 */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '16px', boxSizing: 'border-box', overflowY: 'auto', background: '#e8e8e8' }}>
             <div style={{ flexShrink: 0 }}>
-              <Canvas isPreview />
+              <Canvas isPreview dataSources={resolvedDataSources} />
             </div>
           </div>
 
@@ -483,7 +533,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
           </div>
 
           {/* 中间画布 */}
-          <Canvas />
+          <Canvas dataSources={resolvedDataSources} />
 
           {/* 右侧属性面板 */}
           <div className={`app-right-panel ${rightCollapsed ? 'collapsed' : ''}`}>
@@ -511,7 +561,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
         </div>
 
         {/* 打印预览弹窗 */}
-        <PrintPreview />
+        <PrintPreview dataSources={resolvedDataSources} />
 
         {/* 页眉页脚弹窗 */}
         <HeaderFooterDialog />

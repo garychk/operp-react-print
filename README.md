@@ -55,6 +55,7 @@ function Previewer() {
 |------|------|------|------|
 | `isPreview` | `boolean` | 否 | 是否为预览模式（只读），默认为 `false` |
 | `initialTemplateData` | `TemplateData` | 否 | 初始模板数据，用于加载已有的模板 |
+| `dataSource` | `PrintDesignerDataSource` | 否 | 外部数据源，传入后优先于模板内部数据源用于渲染和打印 |
 | `onSave` | `(data: TemplateData) => void` | 否 | 保存回调函数，当用户点击保存按钮时触发 |
 | `onPrint` | `() => void` | 否 | 打印回调函数，当用户点击打印按钮时触发 |
 
@@ -83,6 +84,15 @@ interface DataSource {
   type: DataSourceType; // 数据源类型：'object' 或 'array'
   data: string;         // JSON 字符串格式的数据
   createdAt: number;    // 创建时间戳
+}
+```
+
+### PrintDesignerDataSource
+
+```typescript
+interface PrintDesignerDataSource {
+  data?: Record<string, unknown>;      // 对象数据
+  list?: Record<string, unknown>[];    // 列表数据
 }
 ```
 

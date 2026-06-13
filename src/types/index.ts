@@ -53,6 +53,14 @@ export interface DataSource {
   createdAt: number;
 }
 
+/* ========== 外部传入的数据源 ========== */
+export interface PrintDesignerDataSource {
+  /** 对象数据，用于文本、图片、条码、二维码等单值绑定 */
+  data?: Record<string, unknown>;
+  /** 数组数据，用于表格绑定 */
+  list?: Record<string, unknown>[];
+}
+
 /* ========== 纸张尺寸预设 ========== */
 export type PaperSizePreset = 'A4' | 'A3' | 'A5' | 'Letter' | 'Legal' | 'custom';
 

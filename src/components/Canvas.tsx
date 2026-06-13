@@ -254,7 +254,7 @@ const TableRenderer: React.FC<{ comp: CanvasComp; style: React.CSSProperties; da
   );
 };
 
-const Canvas: React.FC<{ isPreview?: boolean }> = ({ isPreview = false }) => {
+const Canvas: React.FC<{ isPreview?: boolean; dataSources?: DataSource[] }> = ({ isPreview = false, dataSources: dataSourcesProp }) => {
   const components = useDesignerStore((s) => s.components);
   const selectedId = useDesignerStore((s) => s.selectedId);
   const pageSettings = useDesignerStore((s) => s.pageSettings);
@@ -263,7 +263,8 @@ const Canvas: React.FC<{ isPreview?: boolean }> = ({ isPreview = false }) => {
   const setComponents = useDesignerStore((s) => s.setComponents);
   const addComponent = useDesignerStore((s) => s.addComponent);
   const gridSettings = useDesignerStore((s) => s.gridSettings);
-  const dataSources = useDesignerStore((s) => s.dataSources);
+  const storeDataSources = useDesignerStore((s) => s.dataSources);
+  const dataSources = dataSourcesProp || storeDataSources;
 
   // 计算纸张像素尺寸
   const pagePixel = useMemo(() => {

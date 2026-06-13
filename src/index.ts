@@ -16,6 +16,7 @@ export type {
   TemplateData,
   DataSource,
   DataSourceType,
+  PrintDesignerDataSource,
   TableColumnConfig,
   DataBinding,
   DataBindingConfig,
