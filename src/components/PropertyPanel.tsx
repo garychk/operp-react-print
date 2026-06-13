@@ -341,7 +341,7 @@ const PropertyPanel: React.FC = () => {
       {
         title: '列标题',
         dataIndex: 'title',
-        width: 100,
+        width: 60,
         render: (_, record) => {
           // 使用临时编辑值或原始值
           const currentValue = record.key in editingTitles 
@@ -378,7 +378,7 @@ const PropertyPanel: React.FC = () => {
       {
         title: '绑定字段',
         dataIndex: 'fieldPath',
-        width: 120,
+        width: 100,
         render: (_, record) => {
           return (
             <Select
@@ -401,7 +401,7 @@ const PropertyPanel: React.FC = () => {
       },
       {
         title: '操作',
-        width: 60,
+        width: 50,
         render: (_, record) => (
           <Popconfirm
             title="确定要删除吗?"
@@ -451,7 +451,7 @@ const PropertyPanel: React.FC = () => {
           columns={tableColumns}
           pagination={false}
           size="small"
-          style={{ width: '280px' }}
+          scroll={{ x: 200,y: 360 }}
           bordered
           rowKey="key"
         />
