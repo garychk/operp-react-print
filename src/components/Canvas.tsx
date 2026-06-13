@@ -7,7 +7,7 @@ import { CanvasComponent as CanvasComp, CanvasComponentType, DataSource, DataBin
 import { PAPER_SIZES, MM_TO_PX_RATIO } from '../constants';
 import Barcode from './Barcode';
 import QRCode from './QRCode';
-import { getRenderValue, getObjectFromDataSource, getArrayFromDataSource } from '../utils/dataHelper';
+import { formatRenderValue, getRenderValue, getObjectFromDataSource, getArrayFromDataSource } from '../utils/dataHelper';
 
 // 类型断言解决 react-grid-layout 类型兼容问题
 const GridLayoutComponent = GridLayout as any;
@@ -50,7 +50,7 @@ const RenderComponent: React.FC<{
             wordBreak: 'break-word',
           }}
         >
-          {getBoundValue('content') || ''}
+          {formatRenderValue(getBoundValue('content') || '', comp.props.format as string)}
         </div>
       );
     case 'image':
@@ -155,6 +155,9 @@ const RenderComponent: React.FC<{
 const TableRenderer: React.FC<{ comp: CanvasComp; style: React.CSSProperties; dataSources?: DataSource[] }> = ({ comp, style, dataSources = [] }) => {
   const borderWidth = (comp.props.borderWidth as number) || 1;
   const borderColor = (comp.props.borderColor as string) || '#000';
+  const headerBackgroundColor = (comp.props.headerBackgroundColor as string) || '#f5f5f5';
+  const headerColor = (comp.props.headerColor as string) || '#000000';
+  const headerFontSize = (comp.props.headerFontSize as number) || 12;
   const tableColumns = comp.tableColumns || [];
   
   // 尝试查找绑定的数组数据源
@@ -176,16 +179,17 @@ const TableRenderer: React.FC<{ comp: CanvasComp; style: React.CSSProperties; da
         {/* 表头 */}
         {tableColumns.length > 0 && (
           <thead>
-            <tr style={{ backgroundColor: '#f5f5f5' }}>
+            <tr style={{ backgroundColor: headerBackgroundColor }}>
               {tableColumns.map((col, i) => (
                 <th
                   key={i}
                   style={{
                     border: `${borderWidth}px solid ${borderColor}`,
                     padding: 4,
-                    fontSize: 12,
+                    fontSize: headerFontSize,
                     fontWeight: 'bold',
                     textAlign: 'center',
+                    color: headerColor,
                   }}
                 >
                   {col.title}

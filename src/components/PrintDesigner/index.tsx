@@ -22,6 +22,7 @@ import Barcode from '../Barcode';
 import QRCode from '../QRCode';
 import {
   safeParseJSON,
+  formatRenderValue,
   getValueByPath,
   getObjectFromDataSource,
   getArrayFromDataSource,
@@ -212,7 +213,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
                 wordBreak: 'break-word',
               }}
             >
-              {getRenderValue(comp, 'content', resolvedDataSources)}
+              {formatRenderValue(getRenderValue(comp, 'content', resolvedDataSources), p.format as string)}
             </div>
           </div>
         );
@@ -315,6 +316,9 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
     const cols = comp.tableColumns || [];
     const borderWidth = (comp.props.borderWidth as number) || 1;
     const borderColor = (comp.props.borderColor as string) || '#000000';
+    const headerBackgroundColor = (comp.props.headerBackgroundColor as string) || '#f5f5f5';
+    const headerColor = (comp.props.headerColor as string) || '#000000';
+    const headerFontSize = (comp.props.headerFontSize as number) || 12;
 
     // 如果有数组数据源，则渲染动态数据
     if (data && data.length > 0) {
@@ -329,16 +333,17 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
           {/* 表头 */}
           {cols.length > 0 && (
             <thead>
-              <tr style={{ backgroundColor: '#f5f5f5' }}>
+              <tr style={{ backgroundColor: headerBackgroundColor }}>
                 {cols.map((col: any, i: number) => (
                   <th
                     key={i}
                     style={{
                       border: `${borderWidth}px solid ${borderColor}`,
                       padding: 4,
-                      fontSize: 12,
+                      fontSize: headerFontSize,
                       fontWeight: 'bold',
                       textAlign: 'center',
+                      color: headerColor,
                     }}
                   >
                     {col.title}

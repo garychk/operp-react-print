@@ -9,6 +9,7 @@ import Barcode from './Barcode';
 import QRCode from './QRCode';
 import {
   safeParseJSON,
+  formatRenderValue,
   getValueByPath,
   getObjectFromDataSource,
   getArrayFromDataSource,
@@ -95,6 +96,9 @@ const PrintPreview: React.FC<{ dataSources?: DataSource[] }> = ({ dataSources: d
     const cols = comp.tableColumns || [];
     const borderWidth = (comp.props.borderWidth as number) || 1;
     const borderColor = (comp.props.borderColor as string) || '#000000';
+    const headerBackgroundColor = (comp.props.headerBackgroundColor as string) || '#f5f5f5';
+    const headerColor = (comp.props.headerColor as string) || '#000000';
+    const headerFontSize = (comp.props.headerFontSize as number) || 12;
 
     // 如果没有数据或者没有绑定，展示静态的几行
     const displayData = data || Array.from({ length: (comp.props.rows as number) || 3 }).map(() => ({}));
@@ -117,9 +121,10 @@ const PrintPreview: React.FC<{ dataSources?: DataSource[] }> = ({ dataSources: d
                   border: `${borderWidth}px solid ${borderColor}`,
                   padding: 4,
                   textAlign: 'center',
-                  fontSize: 12,
+                  fontSize: headerFontSize,
                   fontWeight: 'bold',
-                  backgroundColor: '#f5f5f5',
+                  backgroundColor: headerBackgroundColor,
+                  color: headerColor,
                 }}
               >
                 {col.title || `列${cIndex + 1}`}
@@ -188,7 +193,7 @@ const PrintPreview: React.FC<{ dataSources?: DataSource[] }> = ({ dataSources: d
                 wordBreak: 'break-word',
               }}
             >
-              {getRenderValue(comp, 'content')}
+              {formatRenderValue(getRenderValue(comp, 'content'), p.format as string)}
             </div>
           </div>
         );

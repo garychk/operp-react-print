@@ -45,6 +45,61 @@ export function getRenderValue(
 }
 
 /**
+ * 按组件格式配置渲染值。目前支持常用日期格式，如 yyyyMMdd、yyyy-MM-dd HH:mm:ss。
+ */
+export function formatRenderValue(value: string, format?: string): string {
+  if (!format || !value) return value;
+
+  const date = parseDateValue(value);
+  if (!date) return value;
+
+  const pad = (num: number, len = 2) => String(num).padStart(len, '0');
+  const tokens: Record<string, string> = {
+    yyyy: String(date.getFullYear()),
+    yy: String(date.getFullYear()).slice(-2),
+    MM: pad(date.getMonth() + 1),
+    M: String(date.getMonth() + 1),
+    dd: pad(date.getDate()),
+    d: String(date.getDate()),
+    HH: pad(date.getHours()),
+    H: String(date.getHours()),
+    mm: pad(date.getMinutes()),
+    m: String(date.getMinutes()),
+    ss: pad(date.getSeconds()),
+    s: String(date.getSeconds()),
+  };
+
+  return format.replace(/yyyy|yy|MM|M|dd|d|HH|H|mm|m|ss|s/g, (token) => tokens[token]);
+}
+
+function parseDateValue(value: string): Date | null {
+  const normalized = value.trim();
+  if (!normalized) return null;
+
+  if (/^\d{8}$/.test(normalized)) {
+    const year = Number(normalized.slice(0, 4));
+    const month = Number(normalized.slice(4, 6));
+    const day = Number(normalized.slice(6, 8));
+    return createValidDate(year, month, day);
+  }
+
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function createValidDate(year: number, month: number, day: number): Date | null {
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+  return date;
+}
+
+/**
  * 通过路径获取对象属性值
  * 例如：obj = {a: {b: 123}}, path = 'a.b' -> return 123
  */

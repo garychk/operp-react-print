@@ -451,6 +451,7 @@ const PropertyPanel: React.FC = () => {
           columns={tableColumns}
           pagination={false}
           size="small"
+          style={{ width: '280px' }}
           bordered
           rowKey="key"
         />
@@ -469,6 +470,13 @@ const PropertyPanel: React.FC = () => {
               label="内容"
               placeholder="请输入文本内容"
               isTextarea
+            />
+            <Text style={{ fontSize: 12, marginTop: 8, display: 'block' }}>格式</Text>
+            <Input
+              size="small"
+              placeholder="例如 yyyyMMdd 或 yyyy-MM-dd HH:mm:ss"
+              value={(comp.props.format as string) || ''}
+              onChange={(e) => handlePropChange('format', e.target.value)}
             />
             <Divider style={{ margin: '4px 0' }} />
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
@@ -530,24 +538,20 @@ const PropertyPanel: React.FC = () => {
                   />
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <div>
-                  <Text style={{ fontSize: 12 }}>字体颜色</Text>
+              <Space>
+                <Text style={{ fontSize: 12 }}>字体颜色</Text>
                   <ColorPicker
                     size="small"
                     value={(comp.props.color as string) || '#000000'}
                     onChange={(_, hex) => handlePropChange('color', hex)}
                   />
-                </div>
-                <div>
                   <Text style={{ fontSize: 12 }}>背景色</Text>
                   <ColorPicker
                     size="small"
                     value={(comp.props.backgroundColor as string) || 'transparent'}
                     onChange={(_, hex) => handlePropChange('backgroundColor', hex)}
                   />
-                </div>
-              </div>
+              </Space>
             </Space>
           </>
         );
@@ -572,7 +576,57 @@ const PropertyPanel: React.FC = () => {
         );
       case 'table':
         return (
-          <RenderTableColumnEditor />
+          <>
+            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+              边框样式
+            </Text>
+            <Space>
+              <Text style={{ fontSize: 12 }}>粗细</Text>
+                <InputNumber
+                  size="small"
+                  value={(comp.props.borderWidth as number) || 1}
+                  min={0}
+                  max={20}
+                  onChange={(v) => handlePropChange('borderWidth', v ?? 1)}
+                />
+                <Text style={{ fontSize: 12 }}>颜色</Text>
+                <ColorPicker
+                  size="small"
+                  value={(comp.props.borderColor as string) || '#000000'}
+                  onChange={(_, hex) => handlePropChange('borderColor', hex)}
+                />
+            </Space>
+            <Divider style={{ margin: '4px 0' }} />
+            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+              列标题样式
+            </Text>
+            <Space>
+              <Text style={{ fontSize: 12 }}>字号</Text>
+                <InputNumber
+                  size="small"
+                  value={(comp.props.headerFontSize as number) || 12}
+                  min={6}
+                  max={200}
+                  onChange={(v) => handlePropChange('headerFontSize', v ?? 12)}
+                />                
+            </Space>
+            <Space>
+              <Text style={{ fontSize: 12 }}>背景色</Text>
+                <ColorPicker
+                  size="small"
+                  value={(comp.props.headerBackgroundColor as string) || '#f5f5f5'}
+                  onChange={(_, hex) => handlePropChange('headerBackgroundColor', hex)}
+                />
+                <Text style={{ fontSize: 12 }}>字体颜色</Text>
+                <ColorPicker
+                  size="small"
+                  value={(comp.props.headerColor as string) || '#000000'}
+                  onChange={(_, hex) => handlePropChange('headerColor', hex)}
+                />
+            </Space>
+            <Divider style={{ margin: '4px 0' }} />
+            <RenderTableColumnEditor />
+          </>
         );
       case 'barcode':
         return (

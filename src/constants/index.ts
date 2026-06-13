@@ -56,6 +56,7 @@ export const COMPONENT_DEFAULTS = {
     textAlign: 'left' as const,
     color: '#000000',
     backgroundColor: 'transparent',
+    format: '',
   },
   image: {
     src: '',
@@ -67,6 +68,9 @@ export const COMPONENT_DEFAULTS = {
     cols: 3,
     borderWidth: 1,
     borderColor: '#000000',
+    headerBackgroundColor: '#f5f5f5',
+    headerColor: '#000000',
+    headerFontSize: 12,
     content: '',
   },
   barcode: {

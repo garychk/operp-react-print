@@ -27,6 +27,7 @@ export {
   getRenderValue,
   getObjectFromDataSource,
   getArrayFromDataSource,
+  formatRenderValue,
   safeParseJSON,
   getValueByPath,
 } from './utils/dataHelper';
