@@ -1,12 +1,7 @@
-import React, { useEffect, useRef, useMemo, useState } from 'react';
-import { App as AntApp, Button, Space } from 'antd';
+import React, { useEffect, useRef, useMemo } from 'react';
+import { App as AntApp, Button, Space, Splitter } from 'antd';
 import {
-  LeftOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   PrinterOutlined,
-  RightOutlined,
-  SettingOutlined,
 } from '@ant-design/icons';
 import { useReactToPrint } from 'react-to-print';
 import Toolbar from '../Toolbar';
@@ -43,7 +38,7 @@ export interface PrintDesignerProps {
 }
 
 const PrintDesigner: React.FC<PrintDesignerProps> = ({
-  isPreview = false,
+  isPreview = true,
   initialTemplateData,
   dataSource,
   onSave,
@@ -51,8 +46,6 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
 }) => {
   const { importJSON, exportJSON, reset, components, pageSettings, gridSettings, dataSources } = useDesignerStore();
   const printRef = useRef<HTMLDivElement>(null);
-  const [leftCollapsed, setLeftCollapsed] = useState(false);
-  const [rightCollapsed, setRightCollapsed] = useState(false);
 
   // 初始化数据
   useEffect(() => {
@@ -417,11 +410,9 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
       <AntApp>
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
           {/* 顶部工具栏 */}
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e8e8e8', background: '#fff' }}>
+          <div style={{ padding: '6px 8px', borderBottom: '1px solid #e8e8e8', background: '#fff', textAlign: 'right' }}>
             <Space>
-              <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint}>
-                打印
-              </Button>
+              <Button type="text" ghost icon={<PrinterOutlined />} onClick={handlePrint}></Button>
             </Space>
           </div>
           
@@ -512,58 +503,26 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
         <Toolbar onCustomSave={onSave ? handleSave : undefined} onCustomPrint={onPrint} />
 
         {/* 主体三栏布局 */}
-        <div className="app-body">
+        <Splitter className="app-body">
           {/* 左侧面板 */}
-          <div className={`app-left-panel ${leftCollapsed ? 'collapsed' : ''}`}>
-            {leftCollapsed ? (
-              <Button
-                type="text"
-                className="panel-collapsed-trigger"
-                icon={<MenuUnfoldOutlined />}
-                onClick={() => setLeftCollapsed(false)}
-                title="展开左侧面板"
-              />
-            ) : (
-              <>
-                <Button
-                  type="text"
-                  className="panel-collapse-trigger panel-collapse-trigger-left"
-                  icon={<MenuFoldOutlined />}
-                  onClick={() => setLeftCollapsed(true)}
-                  title="折叠左侧面板"
-                />
-                <LeftPanel />
-              </>
-            )}
-          </div>
+          <Splitter.Panel defaultSize={240} min={80} max={400} collapsible>
+            <div className="app-left-panel">
+              <LeftPanel />
+            </div>
+          </Splitter.Panel>
 
           {/* 中间画布 */}
-          <Canvas dataSources={resolvedDataSources} />
+          <Splitter.Panel min={400}>
+            <Canvas dataSources={resolvedDataSources} />
+          </Splitter.Panel>
 
           {/* 右侧属性面板 */}
-          <div className={`app-right-panel ${rightCollapsed ? 'collapsed' : ''}`}>
-            {rightCollapsed ? (
-              <Button
-                type="text"
-                className="panel-collapsed-trigger"
-                icon={<MenuFoldOutlined />}
-                onClick={() => setRightCollapsed(false)}
-                title="展开属性面板"
-              />
-            ) : (
-              <>
-                <Button
-                  type="text"
-                  className="panel-collapse-trigger panel-collapse-trigger-right"
-                  icon={<MenuUnfoldOutlined />}
-                  onClick={() => setRightCollapsed(true)}
-                  title="折叠属性面板"
-                />
-                <PropertyPanel />
-              </>
-            )}
-          </div>
-        </div>
+          <Splitter.Panel defaultSize={260} min={80} max={400} collapsible>
+            <div className="app-right-panel">
+              <PropertyPanel />
+            </div>
+          </Splitter.Panel>
+        </Splitter>
 
         {/* 打印预览弹窗 */}
         <PrintPreview dataSources={resolvedDataSources} />
