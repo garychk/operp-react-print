@@ -38,7 +38,7 @@ export interface PrintDesignerProps {
 }
 
 const PrintDesigner: React.FC<PrintDesignerProps> = ({
-  isPreview = true,
+  isPreview = false,
   initialTemplateData,
   dataSource,
   onSave,
