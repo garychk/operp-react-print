@@ -522,10 +522,10 @@ const PrintDesignerInner: React.FC<PrintDesignerInnerProps> = ({
         {/* 顶部工具栏 */}
         <Toolbar onCustomSave={onSave ? handleSave : undefined} onCustomPrint={onPrint} />
 
-        {/* 主体三栏布局 */}
+        {/* 主体三栏布局：左右各 20%，中间自适应占剩余 60% */}
         <Splitter className="app-body">
           {/* 左侧面板 */}
-          <Splitter.Panel defaultSize={240} min={80} max={400} collapsible>
+          <Splitter.Panel defaultSize="20%" min={80} max="50%" collapsible>
             <div className="app-left-panel">
               <LeftPanel />
             </div>
@@ -537,7 +537,7 @@ const PrintDesignerInner: React.FC<PrintDesignerInnerProps> = ({
           </Splitter.Panel>
 
           {/* 右侧属性面板 */}
-          <Splitter.Panel defaultSize={260} min={80} max={400} collapsible>
+          <Splitter.Panel defaultSize="20%" min={80} max="50%" collapsible>
             <div className="app-right-panel">
               <PropertyPanel />
             </div>
