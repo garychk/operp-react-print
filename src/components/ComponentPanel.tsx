@@ -1,4 +1,5 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Space, Typography } from 'antd';
 import {
   FontSizeOutlined,
@@ -10,7 +11,6 @@ import {
 } from '@ant-design/icons';
 import { useDesignerStore } from '../store';
 import { CanvasComponentType } from '../types';
-import { COMPONENT_TYPE_LABELS } from '../constants';
 
 const { Text } = Typography;
 
@@ -20,17 +20,21 @@ interface ComponentItem {
   label: string;
 }
 
-const items: ComponentItem[] = [
-  { type: 'text', icon: <FontSizeOutlined />, label: '文本' },
-  { type: 'image', icon: <PictureOutlined />, label: '图片' },
-  { type: 'table', icon: <TableOutlined />, label: '表格' },
-  { type: 'barcode', icon: <BarcodeOutlined />, label: '条形码' },
-  { type: 'qrcode', icon: <QrcodeOutlined />, label: '二维码' },
-  { type: 'line', icon: <MinusOutlined />, label: '分割线' },
-];
-
 const ComponentPanel: React.FC = () => {
+  const { t } = useTranslation();
   const addComponent = useDesignerStore((s) => s.addComponent);
+
+  const items: ComponentItem[] = useMemo(
+    () => [
+      { type: 'text', icon: <FontSizeOutlined />, label: t('component.text') },
+      { type: 'image', icon: <PictureOutlined />, label: t('component.image') },
+      { type: 'table', icon: <TableOutlined />, label: t('component.table') },
+      { type: 'barcode', icon: <BarcodeOutlined />, label: t('component.barcode') },
+      { type: 'qrcode', icon: <QrcodeOutlined />, label: t('component.qrcode') },
+      { type: 'line', icon: <MinusOutlined />, label: t('component.line') },
+    ],
+    [t],
+  );
 
   const handleDragStart = useCallback(
     (e: React.DragEvent, type: CanvasComponentType) => {
@@ -41,15 +45,15 @@ const ComponentPanel: React.FC = () => {
   );
 
   const handleClick = useCallback(
-    (type: CanvasComponentType) => {
-      addComponent(type);
+    (type: CanvasComponentType, label: string) => {
+      addComponent(type, undefined, undefined, label);
     },
     [addComponent],
   );
 
   return (
     <Card
-      title="组件面板"
+      title={t('component.panelTitle')}
       size="small"
     >
       <Space direction="vertical" style={{ width: '100%' }} size={4}>
@@ -58,7 +62,7 @@ const ComponentPanel: React.FC = () => {
             key={item.type}
             draggable
             onDragStart={(e) => handleDragStart(e, item.type)}
-            onClick={() => handleClick(item.type)}
+            onClick={() => handleClick(item.type, item.label)}
             style={{
               cursor: 'grab',
               padding: '8px 12px',

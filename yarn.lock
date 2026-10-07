@@ -43,7 +43,7 @@
   resolved "https://registry.npmmirror.com/@ant-design/icons-svg/-/icons-svg-4.4.2.tgz"
   integrity sha512-vHbT+zJEVzllwP+CM+ul7reTEfBR0vgxFe7+lREAsAA7YGsYpboiq2sQNeQeRvh09GfQgs/GyFEvZpJ9cLXpXA==
 
-"@ant-design/icons@^5.5.0", "@ant-design/icons@^5.6.1":
+"@ant-design/icons@^5.6.1", "@ant-design/icons@>=5.0.0":
   version "5.6.1"
   resolved "https://registry.npmmirror.com/@ant-design/icons/-/icons-5.6.1.tgz"
   integrity sha512-0/xS39c91WjPAZOWsvi1//zjx6kAp4kxWwctR6kuU6p133w8RU0D2dSCvZC19uQyharg/sAvYxGYWl01BbZZfg==
@@ -193,7 +193,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.29.7"
 
-"@babel/runtime@^7.10.1", "@babel/runtime@^7.10.4", "@babel/runtime@^7.11.1", "@babel/runtime@^7.11.2", "@babel/runtime@^7.16.7", "@babel/runtime@^7.18.0", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.0", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.22.5", "@babel/runtime@^7.23.2", "@babel/runtime@^7.23.6", "@babel/runtime@^7.23.9", "@babel/runtime@^7.24.4", "@babel/runtime@^7.24.7", "@babel/runtime@^7.24.8", "@babel/runtime@^7.25.7", "@babel/runtime@^7.26.0":
+"@babel/runtime@^7.10.1", "@babel/runtime@^7.10.4", "@babel/runtime@^7.11.1", "@babel/runtime@^7.11.2", "@babel/runtime@^7.16.7", "@babel/runtime@^7.18.0", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.0", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.22.5", "@babel/runtime@^7.23.2", "@babel/runtime@^7.23.6", "@babel/runtime@^7.23.9", "@babel/runtime@^7.24.4", "@babel/runtime@^7.24.7", "@babel/runtime@^7.24.8", "@babel/runtime@^7.25.7", "@babel/runtime@^7.26.0", "@babel/runtime@^7.29.7":
   version "7.29.7"
   resolved "https://registry.npmmirror.com/@babel/runtime/-/runtime-7.29.7.tgz"
   integrity sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==
@@ -461,7 +461,7 @@
     "@types/babel__core" "^7.20.5"
     react-refresh "^0.17.0"
 
-antd@^5.22.0:
+antd@>=5.0.0:
   version "5.29.3"
   resolved "https://registry.npmmirror.com/antd/-/antd-5.29.3.tgz"
   integrity sha512-3DdbGCa9tWAJGcCJ6rzR8EJFsv2CtyEbkVabZE14pfgUHfCicWCj0/QzQVLDYg8CPfQk9BH7fHCoTXHTy7MP/A==
@@ -637,6 +637,16 @@ gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
   resolved "https://registry.npmmirror.com/gensync/-/gensync-1.0.0-beta.2.tgz"
   integrity sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==
+
+html-parse-stringify@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmmirror.com/html-parse-stringify/-/html-parse-stringify-4.0.1.tgz"
+  integrity sha512-0zHsZJrK7S3K2aucXWL6ycoYJ/iNtIcFHC/nYQgFklPtrv5LpJctIiSCroWZWeuoXvuyFdzp6KzjJQ+OT5MfFw==
+
+i18next@^26.4.2, "i18next@>= 26.2.0":
+  version "26.4.2"
+  resolved "https://registry.npmmirror.com/i18next/-/i18next-26.4.2.tgz"
+  integrity sha512-RX+R0VLg13IbvRuJSxnqykUFS9vQZTl8wYpWPCIUDWVrSGjsQywB5Y+pjzrkboxGAuYfJZVH1InFTdgBdxq6ug==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
@@ -1073,7 +1083,7 @@ rc-virtual-list@^3.14.2, rc-virtual-list@^3.5.1, rc-virtual-list@^3.5.2:
     rc-resize-observer "^1.0.0"
     rc-util "^5.36.0"
 
-react-dom@*, react-dom@^18.3.1, "react-dom@>= 16.3", "react-dom@>= 16.3.0", react-dom@>=16.0.0, react-dom@>=16.11.0, react-dom@>=16.9.0:
+react-dom@*, "react-dom@>= 16.3", "react-dom@>= 16.3.0", react-dom@>=16.0.0, react-dom@>=16.11.0, react-dom@>=16.9.0, react-dom@>=18.0.0:
   version "18.3.1"
   resolved "https://registry.npmmirror.com/react-dom/-/react-dom-18.3.1.tgz"
   integrity sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==
@@ -1089,7 +1099,7 @@ react-draggable@^4.4.6, react-draggable@^4.5.0:
     clsx "^2.1.1"
     prop-types "^15.8.1"
 
-react-grid-layout@^1.5.0:
+react-grid-layout@>=1.5.0:
   version "1.5.3"
   resolved "https://registry.npmmirror.com/react-grid-layout/-/react-grid-layout-1.5.3.tgz"
   integrity sha512-KaG6IbjD6fYhagUtIvOzhftXG+ViKZjCjADe86X1KHl7C/dsBN2z0mi14nbvZKTkp0RKiil9RPcJBgq3LnoA8g==
@@ -1100,6 +1110,15 @@ react-grid-layout@^1.5.0:
     react-draggable "^4.4.6"
     react-resizable "^3.0.5"
     resize-observer-polyfill "^1.5.1"
+
+react-i18next@^17.0.16:
+  version "17.0.16"
+  resolved "https://registry.npmmirror.com/react-i18next/-/react-i18next-17.0.16.tgz"
+  integrity sha512-7uImVD9hG5yUOaP5KHVied1x0A004Di/KU031ULR35Ma+9e9H5GdnNZHgQEIByyAz+IAXBkRDTedNVzjPUH8ZA==
+  dependencies:
+    "@babel/runtime" "^7.29.7"
+    html-parse-stringify "^4.0.1"
+    use-sync-external-store "^1.6.0"
 
 react-is@^16.13.1:
   version "16.13.1"
@@ -1124,12 +1143,12 @@ react-resizable@^3.0.5:
     prop-types "15.x"
     react-draggable "^4.5.0"
 
-react-to-print@^3.0.2:
+react-to-print@>=3.0.0:
   version "3.3.0"
   resolved "https://registry.npmmirror.com/react-to-print/-/react-to-print-3.3.0.tgz"
   integrity sha512-7j9GIeNZA9glZlbv9mIbIHDOOx+WYfRMbJzh04NiSKjdaeGkxJuKjJQrtRuNKtt5AvEVVjrLCPokZ9yJX51Fvg==
 
-react@*, "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ~19", react@^18.3.1, "react@>= 16.3", "react@>= 16.3.0", react@>=16.0.0, react@>=16.11.0, react@>=16.9.0, react@>=18.0.0:
+react@*, "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ~19", react@^18.3.1, "react@>= 16.3", "react@>= 16.3.0", "react@>= 16.8.0", react@>=16.0.0, react@>=16.11.0, react@>=16.9.0, react@>=18.0.0:
   version "18.3.1"
   resolved "https://registry.npmmirror.com/react/-/react-18.3.1.tgz"
   integrity sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==
@@ -1227,7 +1246,7 @@ toggle-selection@^1.0.6:
   resolved "https://registry.npmmirror.com/toggle-selection/-/toggle-selection-1.0.6.tgz"
   integrity sha512-BiZS+C1OS8g/q2RRbJmy59xpyghNBqrr6k5L/uKBGRsTfxmu3ffiRnd8mlGPUVayg8pvfi5urfnu8TU7DVOkLQ==
 
-typescript@~5.6.2:
+"typescript@^5 || ^6 || ^7", typescript@~5.6.2:
   version "5.6.3"
   resolved "https://registry.npmmirror.com/typescript/-/typescript-5.6.3.tgz"
   integrity sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==
@@ -1244,6 +1263,11 @@ update-browserslist-db@^1.2.3:
   dependencies:
     escalade "^3.2.0"
     picocolors "^1.1.1"
+
+use-sync-external-store@^1.6.0, use-sync-external-store@>=1.2.0:
+  version "1.7.0"
+  resolved "https://registry.npmmirror.com/use-sync-external-store/-/use-sync-external-store-1.7.0.tgz"
+  integrity sha512-6L+EeigHMQhdaIPNIFUKwfWJSwWFQ8gJbJ2DLOs5sDIegTwR9fRxvnM3uciHKjIZhFz+KAv2emhWMRvDmMcY8A==
 
 "vite@^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0", vite@^6.0.0:
   version "6.4.3"
@@ -1264,7 +1288,7 @@ yallist@^3.0.2:
   resolved "https://registry.npmmirror.com/yallist/-/yallist-3.1.1.tgz"
   integrity sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==
 
-zustand@^5.0.0:
+zustand@>=5.0.0:
   version "5.0.14"
   resolved "https://registry.npmmirror.com/zustand/-/zustand-5.0.14.tgz"
   integrity sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g==

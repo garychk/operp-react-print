@@ -1,4 +1,5 @@
 import React, { useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Button, Space, Typography, Divider } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import { useReactToPrint } from 'react-to-print';
@@ -18,6 +19,7 @@ import {
 const { Text } = Typography;
 
 const PrintPreview: React.FC<{ dataSources?: DataSource[] }> = ({ dataSources: dataSourcesProp }) => {
+  const { t } = useTranslation();
   const previewVisible = useDesignerStore((s) => s.previewVisible);
   const setPreviewVisible = useDesignerStore((s) => s.setPreviewVisible);
   const components = useDesignerStore((s) => s.components);
@@ -57,7 +59,7 @@ const PrintPreview: React.FC<{ dataSources?: DataSource[] }> = ({ dataSources: d
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: '打印模板',
+    documentTitle: t('printPreview.documentTitle'),
     pageStyle: `
       @page {
         size: ${pagePixel.width / MM_TO_PX_RATIO}mm ${pagePixel.height / MM_TO_PX_RATIO}mm;
@@ -127,7 +129,7 @@ const PrintPreview: React.FC<{ dataSources?: DataSource[] }> = ({ dataSources: d
                   color: headerColor,
                 }}
               >
-                {col.title || `列${cIndex + 1}`}
+                {col.title || t('property.columnDefault', { index: cIndex + 1 })}
               </th>
             ))}
           </tr>
@@ -290,15 +292,15 @@ const PrintPreview: React.FC<{ dataSources?: DataSource[] }> = ({ dataSources: d
 
   return (
     <Modal
-      title="打印预览"
+      title={t('printPreview.title')}
       open={previewVisible}
       onCancel={() => setPreviewVisible(false)}
       width={pagePixel.width + 80}
       footer={
         <Space>
-          <Button onClick={() => setPreviewVisible(false)}>关闭</Button>
+          <Button onClick={() => setPreviewVisible(false)}>{t('printPreview.close')}</Button>
           <Button type="primary" icon={<PrinterOutlined />} onClick={() => handlePrint()}>
-            打印
+            {t('printPreview.print')}
           </Button>
         </Space>
       }

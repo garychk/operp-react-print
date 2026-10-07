@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Card,
@@ -25,34 +26,21 @@ import {
 import { useDesignerStore } from "../store";
 import { DataSourceType } from "../types";
 import { safeParseJSON } from "../utils/dataHelper";
+import { t as translate } from "../i18n";
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
 
-/** 默认对象类型数据 */
-const DEFAULT_OBJECT_DATA = JSON.stringify(
-  {
-    name: "张三",
-    age: 28,
-    department: "技术部",
-    email: "zhangsan@example.com",
-  },
-  null,
-  2,
-);
+/** 默认对象类型数据（跟随当前语言） */
+const getDefaultObjectData = () =>
+  JSON.stringify(translate("dataSource.sampleObject", { returnObjects: true }), null, 2);
 
-/** 默认数组类型数据 */
-const DEFAULT_ARRAY_DATA = JSON.stringify(
-  [
-    { id: 1, product: "商品A", quantity: 2, price: 100 },
-    { id: 2, product: "商品B", quantity: 5, price: 80 },
-    { id: 3, product: "商品C", quantity: 1, price: 200 },
-  ],
-  null,
-  2,
-);
+/** 默认数组类型数据（跟随当前语言） */
+const getDefaultArrayData = () =>
+  JSON.stringify(translate("dataSource.sampleArray", { returnObjects: true }), null, 2);
 
 const DataSourcePanel: React.FC = () => {
+  const { t } = useTranslation();
   const dataSources = useDesignerStore((s) => s.dataSources);
   const addDataSource = useDesignerStore((s) => s.addDataSource);
   const updateDataSource = useDesignerStore((s) => s.updateDataSource);
@@ -78,9 +66,9 @@ const DataSourcePanel: React.FC = () => {
     } else {
       setEditingId(null);
       setFormValues({
-        name: "新数据源",
+        name: t("dataSource.newName"),
         type: "object",
-        data: DEFAULT_OBJECT_DATA,
+        data: getDefaultObjectData(),
       });
     }
     setModalVisible(true);
@@ -90,34 +78,34 @@ const DataSourcePanel: React.FC = () => {
     // 验证 JSON 格式
     const parsed = safeParseJSON(formValues.data);
     if (parsed === null) {
-      message.error("JSON 格式不正确");
+      message.error(t("dataSource.invalidJson"));
       return;
     }
     if (
       formValues.type === "object" &&
       (Array.isArray(parsed) || typeof parsed !== "object")
     ) {
-      message.error("对象类型数据源必须为对象格式");
+      message.error(t("dataSource.objectFormatError"));
       return;
     }
     if (formValues.type === "array" && !Array.isArray(parsed)) {
-      message.error("数组类型数据源必须为数组格式");
+      message.error(t("dataSource.arrayFormatError"));
       return;
     }
 
     if (editingId) {
       updateDataSource(editingId, formValues);
-      message.success("数据源已更新");
+      message.success(t("dataSource.updated"));
     } else {
       addDataSource(formValues.name, formValues.type, formValues.data);
-      message.success("数据源已添加");
+      message.success(t("dataSource.added"));
     }
     setModalVisible(false);
   };
 
   return (
     <Card
-      title="数据源"
+      title={t("dataSource.title")}
       size="small"
       extra={
         <Button
@@ -126,14 +114,14 @@ const DataSourcePanel: React.FC = () => {
           icon={<PlusOutlined />}
           onClick={() => handleOpenModal()}
         >
-          添加
+          {t("dataSource.add")}
         </Button>
       }
     >
       <List
         size="small"
         dataSource={dataSources}
-        locale={{ emptyText: "暂无数据源" }}
+        locale={{ emptyText: t("dataSource.empty") }}
         renderItem={(ds) => (
           <List.Item
             actions={[
@@ -142,7 +130,7 @@ const DataSourcePanel: React.FC = () => {
                   items: [
                     {
                       key: "edit",
-                      label: "编辑",
+                      label: t("common.edit"),
                       icon: <EditOutlined />,
                       onClick: () => handleOpenModal(ds),
                     },
@@ -153,18 +141,18 @@ const DataSourcePanel: React.FC = () => {
                       key: "delete",
                       label: (
                         <Popconfirm
-                          title="确定要删除这个数据源吗？"
+                          title={t("dataSource.deleteConfirm")}
                           onConfirm={(e) => {
                             e?.stopPropagation();
                             removeDataSource(ds.id);
-                            message.success("已删除");
+                            message.success(t("dataSource.deleted"));
                           }}
-                          okText="确定"
-                          cancelText="取消"
+                          okText={t("common.confirm")}
+                          cancelText={t("common.cancel")}
                           onCancel={(e) => e?.stopPropagation()}
                         >
                           <span style={{ color: "#ff4d4f", cursor: "pointer" }}>
-                            删除
+                            {t("common.delete")}
                           </span>
                         </Popconfirm>
                       ),
@@ -184,7 +172,9 @@ const DataSourcePanel: React.FC = () => {
               description={
                 <Space size={4}>
                   <Tag color={ds.type === "object" ? "blue" : "green"}>
-                    {ds.type === "object" ? "对象" : "数组"}
+                    {ds.type === "object"
+                      ? t("dataSource.typeObject")
+                      : t("dataSource.typeArray")}
                   </Tag>
                 </Space>
               }
@@ -193,20 +183,20 @@ const DataSourcePanel: React.FC = () => {
         )}
       />
       <Modal
-        title={editingId ? "编辑数据源" : "添加数据源"}
+        title={editingId ? t("dataSource.editTitle") : t("dataSource.addTitle")}
         open={modalVisible}
         onOk={handleSave}
         onCancel={() => setModalVisible(false)}
-        okText="保存"
-        cancelText="取消"
+        okText={t("common.save")}
+        cancelText={t("common.cancel")}
       >
         <Space direction="vertical" style={{ width: "100%" }} size="middle">
           <div>
             <Text strong style={{ display: "block", marginBottom: 4 }}>
-              名称
+              {t("dataSource.name")}
             </Text>
             <Input
-              placeholder="请输入数据源名称"
+              placeholder={t("dataSource.namePlaceholder")}
               value={formValues.name}
               onChange={(e) =>
                 setFormValues({ ...formValues, name: e.target.value })
@@ -216,12 +206,12 @@ const DataSourcePanel: React.FC = () => {
 
           <div>
             <Text strong style={{ display: "block", marginBottom: 4 }}>
-              类型
+              {t("dataSource.type")}
             </Text>
             <Select
               options={[
-                { label: "对象", value: "object" },
-                { label: "数组", value: "array" },
+                { label: t("dataSource.typeObject"), value: "object" },
+                { label: t("dataSource.typeArray"), value: "array" },
               ]}
               style={{ width: "100%" }}
               value={formValues.type}
@@ -230,7 +220,7 @@ const DataSourcePanel: React.FC = () => {
                   ...formValues,
                   type: v as DataSourceType,
                   data:
-                    v === "object" ? DEFAULT_OBJECT_DATA : DEFAULT_ARRAY_DATA,
+                    v === "object" ? getDefaultObjectData() : getDefaultArrayData(),
                 });
               }}
             />
@@ -240,11 +230,11 @@ const DataSourcePanel: React.FC = () => {
 
           <div>
             <Text strong style={{ display: "block", marginBottom: 4 }}>
-              JSON 数据
+              {t("dataSource.jsonData")}
             </Text>
             <TextArea
               rows={12}
-              placeholder="请输入 JSON 数据"
+              placeholder={t("dataSource.jsonPlaceholder")}
               value={formValues.data}
               onChange={(e) =>
                 setFormValues({ ...formValues, data: e.target.value })

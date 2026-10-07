@@ -9,11 +9,12 @@ import {
   TableColumnConfig,
 } from '../types';
 import {
-  DEFAULT_PAGE_SETTINGS,
-  COMPONENT_DEFAULTS,
-  COMPONENT_TYPE_LABELS,
+  createDefaultPageSettings,
+  createComponentDefaults,
+  getComponentTypeLabel,
   DEFAULT_GRID_SETTINGS,
 } from '../constants';
+import { t, printDesignerI18n, SUPPORTED_LOCALES } from '../i18n';
 
 let nextId = 0;
 let dataSourceNextId = 0;
@@ -22,6 +23,20 @@ function generateId(): string {
 }
 function generateDataSourceId(): string {
   return `ds_${++dataSourceNextId}`;
+}
+
+/**
+ * 判断某值是否仍是任一语言下的默认种子文案。
+ * 用于语言切换时同步默认文案，同时避免覆盖用户已经手动修改过的内容。
+ */
+function isSeedValue(value: string, key: string): boolean {
+  if (!value) return true;
+  return SUPPORTED_LOCALES.some((lng) => {
+    const bundle = printDesignerI18n.getResourceBundle(lng, 'translation') as
+      | Record<string, string>
+      | undefined;
+    return bundle?.[key] === value;
+  });
 }
 
 export interface DesignerStore {
@@ -45,7 +60,8 @@ export interface DesignerStore {
   activeDataSourceId: string | null;
 
   // 操作
-  addComponent: (type: CanvasComponentType, x?: number, y?: number) => void;
+  /** 添加组件。label 用于覆盖默认展示文案（多语言场景由调用方传入已翻译文本） */
+  addComponent: (type: CanvasComponentType, x?: number, y?: number, label?: string) => void;
   updateComponent: (id: string, props: Partial<CanvasComponent>) => void;
   selectComponent: (id: string | null) => void;
   removeComponent: (id: string) => void;
@@ -63,29 +79,39 @@ export interface DesignerStore {
   updateComponentTableColumns: (compId: string, columns: TableColumnConfig[]) => void;
   /** 获取导出用的模板 JSON 字符串 */
   exportJSON: () => string;
-  /** 从 JSON 字符串导入模板，返回 null 表示成功，返回 string 表示错误信息 */
+  /**
+   * 从 JSON 字符串导入模板。
+   * 返回 null 表示成功；返回字符串表示失败，该字符串为语言无关的错误码（如 'error.invalidTemplate'），
+   * 由调用方通过 i18n 翻译后展示。
+   */
   importJSON: (jsonStr: string) => string | null;
   /** 重置整个设计 */
   reset: () => void;
+  /**
+   * 按当前语言刷新默认种子文案（模板名、页眉/页脚/页码格式）。
+   * 仅当对应值仍是任一语言的默认种子文案（或为空）时才会更新，
+   * 用户手动修改过的内容不受影响。在 locale 变化时由 PrintDesigner 调用。
+   */
+  reseedLocalizedDefaults: () => void;
 }
 
 export const useDesignerStore = create<DesignerStore>((set, get) => ({
   components: [],
   selectedId: null,
-  pageSettings: { ...DEFAULT_PAGE_SETTINGS },
+  pageSettings: createDefaultPageSettings(),
   gridSettings: { ...DEFAULT_GRID_SETTINGS },
   previewVisible: false,
-  templateName: '未命名模板',
+  templateName: t('seed.templateName'),
   headerFooterVisible: false,
   dataSources: [],
   activeDataSourceId: null,
 
-  addComponent: (type, x, y) => {
+  addComponent: (type, x, y, label) => {
     const id = generateId();
-    const label = COMPONENT_TYPE_LABELS[type] || type;
-    const defaults = { ...(COMPONENT_DEFAULTS[type] || {}) };
+    const typeLabel = label ?? getComponentTypeLabel(type);
+    const defaults = createComponentDefaults(type);
     if (type === 'text') {
-      defaults.content = label;
+      defaults.content = typeLabel;
     }
     const newComp: CanvasComponent = {
       id,
@@ -95,7 +121,15 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
       w: type === 'line' ? 20 : type === 'qrcode' ? 12 : 15,
       h: type === 'line' ? 1 : type === 'qrcode' ? 12 : 8,
       props: defaults,
-      ...(type === 'table' ? { tableColumns: [{ title: '列1' }, { title: '列2' }, { title: '列3' }] } : {}),
+      ...(type === 'table'
+        ? {
+            tableColumns: [
+              { title: t('property.columnDefault', { index: 1 }) },
+              { title: t('property.columnDefault', { index: 2 }) },
+              { title: t('property.columnDefault', { index: 3 }) },
+            ],
+          }
+        : {}),
     };
     set((s) => ({
       components: [...s.components, newComp],
@@ -203,7 +237,7 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
     try {
       const data = JSON.parse(jsonStr) as TemplateData;
       if (!data.version || !data.pageSettings || !Array.isArray(data.components)) {
-        return 'JSON 格式不正确，缺少必要字段';
+        return 'error.invalidTemplate';
       }
       // 重新分配 ID
       nextId = 0;
@@ -220,13 +254,13 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
         components,
         dataSources,
         pageSettings: data.pageSettings,
-        templateName: data.templateName || '导入的模板',
+        templateName: data.templateName || t('seed.importedTemplateName'),
         selectedId: null,
         activeDataSourceId: null,
       });
       return null;
     } catch {
-      return 'JSON 解析失败，请检查文件内容';
+      return 'error.parseFailed';
     }
   },
 
@@ -236,13 +270,40 @@ export const useDesignerStore = create<DesignerStore>((set, get) => ({
     set({
       components: [],
       selectedId: null,
-      pageSettings: { ...DEFAULT_PAGE_SETTINGS },
+      pageSettings: createDefaultPageSettings(),
       gridSettings: { ...DEFAULT_GRID_SETTINGS },
-      templateName: '未命名模板',
+      templateName: t('seed.templateName'),
       headerFooterVisible: false,
       previewVisible: false,
       dataSources: [],
       activeDataSourceId: null,
     });
+  },
+
+  reseedLocalizedDefaults: () => {
+    const s = get();
+    const updates: Partial<DesignerStore> = {};
+
+    if (isSeedValue(s.templateName, 'seed.templateName')) {
+      updates.templateName = t('seed.templateName');
+    }
+
+    const ps: Partial<PageSettings> = {};
+    if (isSeedValue(s.pageSettings.headerContent, 'seed.headerContent')) {
+      ps.headerContent = t('seed.headerContent');
+    }
+    if (isSeedValue(s.pageSettings.footerContent, 'seed.footerContent')) {
+      ps.footerContent = t('seed.footerContent');
+    }
+    if (isSeedValue(s.pageSettings.pageNumberFormat, 'seed.pageNumberFormat')) {
+      ps.pageNumberFormat = t('seed.pageNumberFormat');
+    }
+    if (Object.keys(ps).length > 0) {
+      updates.pageSettings = { ...s.pageSettings, ...ps };
+    }
+
+    if (Object.keys(updates).length > 0) {
+      set(updates);
+    }
   },
 }));

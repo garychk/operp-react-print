@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { QRCode as AntQRCode } from 'antd';
 
 interface QRCodeProps {
@@ -14,8 +15,9 @@ const QRCode: React.FC<QRCodeProps> = ({
   color = '#000000',
   backgroundColor = '#ffffff',
 }) => {
+  const { t } = useTranslation();
   if (!value) {
-    return <div style={{ fontSize: 11, color: '#999' }}>请设置二维码内容</div>;
+    return <div style={{ fontSize: 11, color: '#999' }}>{t('component.qrcodeHint')}</div>;
   }
 
   return (

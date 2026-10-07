@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Select, InputNumber, Radio, Typography } from 'antd';
 import { useDesignerStore } from '../store';
 import { PaperSizePreset, Orientation } from '../types';
@@ -7,6 +8,7 @@ import { PAPER_SIZES } from '../constants';
 const { Text } = Typography;
 
 const PageSettings: React.FC = () => {
+  const { t } = useTranslation();
   const pageSettings = useDesignerStore((s) => s.pageSettings);
   const setPageSettings = useDesignerStore((s) => s.setPageSettings);
 
@@ -28,12 +30,12 @@ const PageSettings: React.FC = () => {
 
   return (
     <Card
-      title="页面设置"
+      title={t('pageSettings.title')}
       size="small"
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
-          <Text style={{ fontSize: 12 }}>纸张大小</Text>
+          <Text style={{ fontSize: 12 }}>{t('pageSettings.paperSize')}</Text>
           <Select
             size="small"
             style={{ width: '100%' }}
@@ -41,7 +43,7 @@ const PageSettings: React.FC = () => {
             onChange={handlePaperSize}
             options={[
               ...Object.keys(PAPER_SIZES).map((k) => ({ value: k, label: k })),
-              { value: 'custom', label: '自定义' },
+              { value: 'custom', label: t('pageSettings.custom') },
             ]}
           />
         </div>
@@ -49,7 +51,7 @@ const PageSettings: React.FC = () => {
         {isCustom && (
           <div style={{ display: 'flex', gap: 8 }}>
             <div style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12 }}>宽度 (mm)</Text>
+              <Text style={{ fontSize: 12 }}>{t('pageSettings.widthMm')}</Text>
               <InputNumber
                 size="small"
                 style={{ width: '100%' }}
@@ -60,7 +62,7 @@ const PageSettings: React.FC = () => {
               />
             </div>
             <div style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12 }}>高度 (mm)</Text>
+              <Text style={{ fontSize: 12 }}>{t('pageSettings.heightMm')}</Text>
               <InputNumber
                 size="small"
                 style={{ width: '100%' }}
@@ -74,7 +76,7 @@ const PageSettings: React.FC = () => {
         )}
 
         <div>
-          <Text style={{ fontSize: 12 }}>方向</Text>
+          <Text style={{ fontSize: 12 }}>{t('pageSettings.orientation')}</Text>
           <Radio.Group
             value={pageSettings.orientation}
             onChange={(e) => handleOrientation(e.target.value)}
@@ -82,19 +84,19 @@ const PageSettings: React.FC = () => {
             style={{ width: '100%', display: 'flex' }}
           >
             <Radio.Button value="portrait" style={{ flex: 1, textAlign: 'center' }}>
-              纵向
+              {t('pageSettings.portrait')}
             </Radio.Button>
             <Radio.Button value="landscape" style={{ flex: 1, textAlign: 'center' }}>
-              横向
+              {t('pageSettings.landscape')}
             </Radio.Button>
           </Radio.Group>
         </div>
 
         <div>
-          <Text style={{ fontSize: 12 }}>页边距 (mm)</Text>
+          <Text style={{ fontSize: 12 }}>{t('pageSettings.marginMm')}</Text>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <div>
-              <Text style={{ fontSize: 11 }}>上</Text>
+              <Text style={{ fontSize: 11 }}>{t('pageSettings.marginTop')}</Text>
               <InputNumber
                 size="small"
                 style={{ width: '100%' }}
@@ -105,7 +107,7 @@ const PageSettings: React.FC = () => {
               />
             </div>
             <div>
-              <Text style={{ fontSize: 11 }}>右</Text>
+              <Text style={{ fontSize: 11 }}>{t('pageSettings.marginRight')}</Text>
               <InputNumber
                 size="small"
                 style={{ width: '100%' }}
@@ -116,7 +118,7 @@ const PageSettings: React.FC = () => {
               />
             </div>
             <div>
-              <Text style={{ fontSize: 11 }}>下</Text>
+              <Text style={{ fontSize: 11 }}>{t('pageSettings.marginBottom')}</Text>
               <InputNumber
                 size="small"
                 style={{ width: '100%' }}
@@ -127,7 +129,7 @@ const PageSettings: React.FC = () => {
               />
             </div>
             <div>
-              <Text style={{ fontSize: 11 }}>左</Text>
+              <Text style={{ fontSize: 11 }}>{t('pageSettings.marginLeft')}</Text>
               <InputNumber
                 size="small"
                 style={{ width: '100%' }}

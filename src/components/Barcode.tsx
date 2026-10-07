@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /** 简易条形码渲染组件（使用Canvas绘制） */
 interface BarcodeProps {
@@ -26,6 +27,7 @@ function encodeBarcode(value: string): number[] {
 }
 
 const Barcode: React.FC<BarcodeProps> = ({ value, format }) => {
+  const { t } = useTranslation();
   const pattern = useMemo(() => {
     if (format === 'CODE128') {
       return encodeBarcode(value);
@@ -34,7 +36,7 @@ const Barcode: React.FC<BarcodeProps> = ({ value, format }) => {
   }, [value, format]);
 
   if (!value) {
-    return <div style={{ fontSize: 11, color: '#999' }}>请设置条形码值</div>;
+    return <div style={{ fontSize: 11, color: '#999' }}>{t('component.barcodeHint')}</div>;
   }
 
   const barWidth = 2;

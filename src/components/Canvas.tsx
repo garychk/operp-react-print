@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import GridLayout, { Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -19,6 +20,7 @@ const RenderComponent: React.FC<{
   isPreview?: boolean;
   dataSources?: DataSource[];
 }> = React.memo(({ comp, selected, isPreview = false, dataSources = [] }) => {
+  const { t } = useTranslation();
   const style: React.CSSProperties = {
     width: '100%',
     height: '100%',
@@ -79,7 +81,7 @@ const RenderComponent: React.FC<{
                 fontSize: 12,
               }}
             >
-              请在属性中设置图片地址
+              {t('component.imageHint')}
             </div>
           )}
         </div>
@@ -259,6 +261,7 @@ const TableRenderer: React.FC<{ comp: CanvasComp; style: React.CSSProperties; da
 };
 
 const Canvas: React.FC<{ isPreview?: boolean; dataSources?: DataSource[] }> = ({ isPreview = false, dataSources: dataSourcesProp }) => {
+  const { t } = useTranslation();
   const components = useDesignerStore((s) => s.components);
   const selectedId = useDesignerStore((s) => s.selectedId);
   const pageSettings = useDesignerStore((s) => s.pageSettings);
@@ -331,15 +334,16 @@ const Canvas: React.FC<{ isPreview?: boolean; dataSources?: DataSource[] }> = ({
       if (!compType) return;
       // 计算放置的网格位置
       const rect = (e.target as HTMLElement).closest('.react-grid-layout')?.getBoundingClientRect();
+      const label = t(`component.${compType}`);
       if (rect) {
         const gridX = Math.floor((de.clientX - rect.left) / (canvasW / gridSettings.cols));
         const gridY = Math.floor((de.clientY - rect.top) / (canvasW / gridSettings.cols));
-        addComponent(compType, Math.max(0, gridX), Math.max(0, gridY));
+        addComponent(compType, Math.max(0, gridX), Math.max(0, gridY), label);
       } else {
-        addComponent(compType);
+        addComponent(compType, undefined, undefined, label);
       }
     },
-    [addComponent, canvasW, gridSettings.cols],
+    [addComponent, canvasW, gridSettings.cols, t],
   );
 
   const handleSelect = useCallback(

@@ -1,4 +1,5 @@
 import React, { useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Space, Typography, Input, App } from 'antd';
 import {
   DeleteOutlined,
@@ -33,6 +34,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
   const reset = useDesignerStore((s) => s.reset);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { message } = App.useApp();
+  const { t } = useTranslation();
 
   const handleDelete = useCallback(() => {
     if (selectedId) {
@@ -46,11 +48,11 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${templateName || '模板'}.json`;
+    a.download = `${templateName || t('toolbar.untitled')}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    message.success('模板已导出');
-  }, [exportJSON, templateName, message]);
+    message.success(t('toolbar.exported'));
+  }, [exportJSON, templateName, message, t]);
 
   const handleImportClick = useCallback(() => {
     fileInputRef.current?.click();
@@ -64,22 +66,22 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
       reader.onload = () => {
         const result = importJSON(reader.result as string);
         if (result) {
-          message.error(result);
+          message.error(t(result));
         } else {
-          message.success('模板已导入');
+          message.success(t('toolbar.imported'));
         }
       };
       reader.readAsText(file);
       // 重置 input 以支持重复选同一文件
       e.target.value = '';
     },
-    [importJSON, message],
+    [importJSON, message, t],
   );
 
   const handleReset = useCallback(() => {
     reset();
-    message.info('已新建空白模板');
-  }, [reset, message]);
+    message.info(t('toolbar.newBlank'));
+  }, [reset, message, t]);
 
   return (
     <div
@@ -99,13 +101,13 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
           onChange={(e) => setTemplateName(e.target.value)}
           variant="borderless"
           style={{ width: 200, fontSize: 16, fontWeight: 600 }}
-          placeholder="模板名称"
+          placeholder={t('toolbar.templateNamePlaceholder')}
         />
         
       </Space>
       <Space>
         <Button icon={<PlusOutlined />} onClick={handleReset}>
-          新建
+          {t('toolbar.new')}
         </Button>
         <input
           ref={fileInputRef}
@@ -116,21 +118,21 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
         />
         {onCustomSave ? (
           <Button icon={<SaveOutlined />} onClick={onCustomSave} type="primary">
-            保存
+            {t('toolbar.save')}
           </Button>
         ) : (
           <Button icon={<DownloadOutlined />} onClick={handleExport}>
-            导出
+            {t('toolbar.export')}
           </Button>
         )}
         <Button icon={<UploadOutlined />} onClick={handleImportClick}>
-          导入
+          {t('toolbar.import')}
         </Button>
         <Button
           icon={<SettingOutlined />}
           onClick={() => setHeaderFooterVisible(true)}
         >
-          页眉页脚
+          {t('toolbar.headerFooter')}
         </Button>
         <Button
           danger
@@ -138,7 +140,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
           disabled={!selectedId}
           onClick={handleDelete}
         >
-          删除
+          {t('common.delete')}
         </Button>
         {onCustomPrint ? (
           <Button
@@ -146,7 +148,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
             icon={<PrinterOutlined />}
             onClick={onCustomPrint}
           >
-            打印
+            {t('toolbar.print')}
           </Button>
         ) : (
           <Button
@@ -154,7 +156,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
             icon={<EyeOutlined />}
             onClick={() => setPreviewVisible(true)}
           >
-            预览
+            {t('toolbar.preview')}
           </Button>
         )}
       </Space>

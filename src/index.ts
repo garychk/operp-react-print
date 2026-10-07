@@ -34,3 +34,18 @@ export {
 
 // 导出 store hook
 export { useDesignerStore } from './store';
+
+// 导出 i18n 实例与多语言相关工具（便于宿主应用读取/扩展语言包）
+export {
+  printDesignerI18n,
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  LOCALE_NAMES,
+  matchLocale,
+  normalizeLocale,
+  detectEnvironmentLocale,
+} from './i18n';
+export type { Locale, LocaleOption } from './i18n';
+
+// 导出语言解析 hook（宿主自定义语言来源时可直接复用）
+export { useResolvedLocale, useHostI18nInstance } from './i18n/useResolvedLocale';

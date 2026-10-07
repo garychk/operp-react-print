@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { App as AntApp, Button, Space, Splitter } from 'antd';
+import { App as AntApp, Button, Space, Splitter, ConfigProvider } from 'antd';
 import {
   PrinterOutlined,
 } from '@ant-design/icons';
+import { I18nextProvider, useTranslation } from 'react-i18next';
 import { useReactToPrint } from 'react-to-print';
 import Toolbar from '../Toolbar';
 import LeftPanel from '../LeftPanel';
@@ -23,6 +24,14 @@ import {
   getArrayFromDataSource,
   getRenderValue,
 } from '../../utils/dataHelper';
+import printDesignerI18n, {
+  DEFAULT_LOCALE,
+  Locale,
+  normalizeLocale,
+  type LocaleOption,
+} from '../../i18n';
+import { useResolvedLocale } from '../../i18n/useResolvedLocale';
+import { ANTD_LOCALES } from '../../i18n/antdLocale';
 
 export interface PrintDesignerProps {
   /** 是否为预览模式（只读） */
@@ -35,15 +44,26 @@ export interface PrintDesignerProps {
   onSave?: (templateData: TemplateData) => void;
   /** 打印回调 */
   onPrint?: () => void;
+  /**
+   * 界面语言。
+   * - 具体语言：`'zh-CN' | 'en-US' | 'ja-JP'`，也兼容 `'zh'` / `'en'` / `'zh_CN'` 等简写
+   * - `'auto'`：自动跟随宿主应用（宿主 i18next 实例 → `<html lang>` → `navigator.language`）
+   * @default 'zh-CN'
+   */
+  locale?: LocaleOption | (string & {});
 }
 
-const PrintDesigner: React.FC<PrintDesignerProps> = ({
+/** 内部组件不感知 locale（语言已在 LocaleShell 层落到 i18n 实例上） */
+type PrintDesignerInnerProps = Omit<PrintDesignerProps, 'locale'>;
+
+const PrintDesignerInner: React.FC<PrintDesignerInnerProps> = ({
   isPreview = false,
   initialTemplateData,
   dataSource,
   onSave,
   onPrint,
 }) => {
+  const { t } = useTranslation();
   const { importJSON, exportJSON, reset, components, pageSettings, gridSettings, dataSources } = useDesignerStore();
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -53,11 +73,11 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
       const jsonStr = JSON.stringify(initialTemplateData);
       const error = importJSON(jsonStr);
       if (error) {
-        console.error('导入失败:', error);
+        console.error('Import failed:', t(error));
         reset();
       }
     }
-  }, [initialTemplateData, importJSON, reset]);
+  }, [initialTemplateData, importJSON, reset, t]);
 
   // 导出数据供外部回调使用
   const handleSave = () => {
@@ -66,7 +86,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
         const jsonStr = exportJSON();
         onSave(JSON.parse(jsonStr));
       } catch (e) {
-        console.error('导出失败:', e);
+        console.error('Export failed:', e);
       }
     }
   };
@@ -127,7 +147,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
     if (objectJson !== null && !objectApplied) {
       merged.push({
         id: 'external_data',
-        name: '外部对象数据',
+        name: t('dataSource.externalObjectName'),
         type: 'object',
         data: objectJson,
         createdAt: 0,
@@ -137,7 +157,7 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
     if (listJson !== null && !listApplied) {
       merged.push({
         id: 'external_list',
-        name: '外部列表数据',
+        name: t('dataSource.externalListName'),
         type: 'array',
         data: listJson,
         createdAt: 0,
@@ -145,11 +165,11 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
     }
 
     return merged;
-  }, [dataSource, dataSources]);
+  }, [dataSource, dataSources, t]);
 
   const handlePrintInternal = useReactToPrint({
     contentRef: printRef,
-    documentTitle: '打印模板',
+    documentTitle: t('printPreview.documentTitle'),
     pageStyle: `
       @page {
         size: ${pagePixel.width / MM_TO_PX_RATIO}mm ${pagePixel.height / MM_TO_PX_RATIO}mm;
@@ -533,5 +553,63 @@ const PrintDesigner: React.FC<PrintDesignerProps> = ({
     </AntApp>
   );
 };
+
+interface LocaleShellProps extends PrintDesignerInnerProps {
+  /** 已解析完成的最终语言 */
+  locale: Locale;
+}
+
+/**
+ * 语言落地层：把最终语言写到组件库自己的 i18n 实例上，并注入 antd 语言包。
+ *
+ * 负责：
+ * 1. 同步切换独立 i18n 实例的语言（不污染宿主应用）；
+ * 2. 通过 `I18nextProvider` 向内部组件提供翻译能力；
+ * 3. 通过 antd `ConfigProvider` 让 antd 内置文案（ColorPicker、Empty、Popconfirm 等）跟随语言；
+ * 4. 语言变化后同步默认种子文案（模板名、页眉/页脚/页码格式）。
+ */
+const LocaleShell: React.FC<LocaleShellProps> = ({ locale, ...rest }) => {
+  // 在子组件渲染前同步切换语言，避免首帧出现默认语言文案
+  useMemo(() => {
+    if (printDesignerI18n.language !== locale) {
+      printDesignerI18n.changeLanguage(locale);
+    }
+  }, [locale]);
+
+  // 语言变化后同步默认种子文案，不影响用户已修改的值
+  useEffect(() => {
+    useDesignerStore.getState().reseedLocalizedDefaults();
+  }, [locale]);
+
+  return (
+    <I18nextProvider i18n={printDesignerI18n}>
+      <ConfigProvider locale={ANTD_LOCALES[locale]}>
+        <PrintDesignerInner {...rest} />
+      </ConfigProvider>
+    </I18nextProvider>
+  );
+};
+
+/** locale="auto"：先探测宿主语言，再交给 LocaleShell 落地 */
+const AutoLocalePrintDesigner: React.FC<PrintDesignerInnerProps> = (rest) => {
+  const locale = useResolvedLocale('auto');
+  return <LocaleShell locale={locale} {...rest} />;
+};
+
+/**
+ * 打印设计器入口。
+ *
+ * `locale` 支持三种用法：
+ * - `'zh-CN' | 'en-US' | 'ja-JP'`（默认 `'zh-CN'`）：固定语言；
+ * - `'auto'`：自动跟随宿主应用的语言（宿主 i18next 实例 → `<html lang>` → `navigator.language`），
+ *   宿主切换语言时同步切换；此时无需传 `i18n.language`，宿主零改动即可跟随；
+ * - 其它语言简写（`'zh'` / `'en'` / `'ja'` / `'zh_CN'` 等）：自动归一化。
+ */
+const PrintDesigner: React.FC<PrintDesignerProps> = ({ locale = DEFAULT_LOCALE, ...rest }) =>
+  locale === 'auto' ? (
+    <AutoLocalePrintDesigner {...rest} />
+  ) : (
+    <LocaleShell locale={normalizeLocale(locale)} {...rest} />
+  );
 
 export default PrintDesigner;

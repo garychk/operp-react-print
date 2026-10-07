@@ -58,6 +58,83 @@ function Previewer() {
 | `dataSource` | `PrintDesignerDataSource` | 否 | 外部数据源，传入后优先于模板内部数据源用于渲染和打印 |
 | `onSave` | `(data: TemplateData) => void` | 否 | 保存回调函数，当用户点击保存按钮时触发 |
 | `onPrint` | `() => void` | 否 | 打印回调函数，当用户点击打印按钮时触发 |
+| `locale` | `'zh-CN' \| 'en-US' \| 'ja-JP' \| 'auto'` | 否 | 界面语言，默认 `'zh-CN'`；传 `'auto'` 自动跟随宿主应用语言 |
+
+## 多语言（i18n）
+
+组件内置基于 [i18next](https://www.i18next.com/) 的多语言支持，目前提供 **简体中文 / English / 日本語** 三种语言。
+只需传入 `locale` 属性即可切换语言，组件内部全部界面文案（工具栏、面板标题、属性项、按钮、提示、弹窗等）以及 antd 内置文案（ColorPicker、Empty、Popconfirm 等）都会同步切换。
+
+```tsx
+import { useState } from 'react';
+import PrintDesigner, { type Locale } from 'operp-print-designer';
+
+function App() {
+  const [locale, setLocale] = useState<Locale>('zh-CN');
+
+  return (
+    <PrintDesigner
+      locale={locale}           // 'zh-CN' | 'en-US' | 'ja-JP'
+      initialTemplateData={templateData}
+      onSave={(data) => console.log(data)}
+    />
+  );
+}
+```
+
+### 切换语言
+
+`locale` 是响应式属性，改变后组件会立即重新渲染并切换文案：
+
+```tsx
+<button onClick={() => setLocale(locale === 'zh-CN' ? 'en-US' : 'zh-CN')}>切换语言</button>
+```
+
+### 自动跟随宿主语言（`locale="auto"`）
+
+宿主应用自己有多语言切换时，传 `'auto'` 即可让设计器跟随，**无需自己同步状态**：
+
+```tsx
+<PrintDesigner locale="auto" />
+```
+
+探测优先级（高 → 低）：
+
+1. 宿主的 i18next 实例（`<I18nextProvider>` 注入的、或 `i18next.use(initReactI18next).init()` 初始化的、或仅 `i18next.init()` 的全局单例），并订阅其 `languageChanged` 事件实时跟随；
+2. `<html lang>`（监听其变化）；
+3. `navigator.language`（监听浏览器的 `languagechange` 事件）；
+4. 都未命中时回退 `'zh-CN'`。
+
+语言写法兼容 `'zh'` / `'en'` / `'ja'` / `'zh_CN'` / `'zh-Hant'` 等，自动归一化到最近的支持语言。
+不使用 i18next 的宿主也可以显式传具体语言：`<PrintDesigner locale={currentLang} />`。
+
+### 语言相关导出
+
+```tsx
+import {
+  printDesignerI18n,         // 组件库内部独立的 i18next 实例
+  DEFAULT_LOCALE,            // 'zh-CN'
+  SUPPORTED_LOCALES,         // ['zh-CN', 'en-US', 'ja-JP']
+  LOCALE_NAMES,              // { 'zh-CN': '简体中文', 'en-US': 'English', 'ja-JP': '日本語' }
+  matchLocale,               // 匹配不到返回 null（不做兜底），供自定义探测逻辑使用
+  normalizeLocale,           // 兼容 'zh' / 'zh_cn' / 'en' 等写法，归一化为标准 locale
+  detectEnvironmentLocale,   // 从 <html lang> / navigator 探测当前环境语言
+  useResolvedLocale,         // 完整的解析 hook（含跟随宿主变化的逻辑）
+  useHostI18nInstance,       // 读取宿主的 i18next 实例
+} from 'operp-print-designer';
+```
+
+### 注意
+
+- 组件库使用 **独立的 i18next 实例**（`createInstance`）并通过 `I18nextProvider` 注入，不会影响宿主应用自身的 i18n 配置，也不会注册为 react-i18next 的全局实例。
+- `i18next` / `react-i18next` 是 **peerDependencies**（不重复打包），与宿主共用同一份模块实例——这也是 `locale="auto"` 能读到宿主语言的前提。npm 7+ 会自动安装；如使用 pnpm 并关闭了 `auto-install-peers`，请确保宿主已安装这两个包。
+- 语言包使用**平铺键值对**（如 `'toolbar.new'`），需要扩展/覆盖文案时可调用：
+
+```tsx
+printDesignerI18n.addResourceBundle('en-US', 'translation', {
+  'toolbar.new': 'Create',
+}, true, true);
+```
 
 ## 类型定义
 
