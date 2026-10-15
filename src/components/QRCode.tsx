@@ -17,7 +17,7 @@ const QRCode: React.FC<QRCodeProps> = ({
 }) => {
   const { t } = useTranslation();
   if (!value) {
-    return <div style={{ fontSize: 11, color: '#999' }}>{t('component.qrcodeHint')}</div>;
+    return <div style={{ fontSize: 11, color: 'var(--pd-muted-text, #999)' }}>{t('component.qrcodeHint')}</div>;
   }
 
   return (

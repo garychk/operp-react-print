@@ -66,22 +66,22 @@ const ComponentPanel: React.FC = () => {
             style={{
               cursor: 'grab',
               padding: '8px 12px',
-              border: '1px solid #d9d9d9',
+              border: '1px solid var(--pd-item-border, #d9d9d9)',
               borderRadius: 6,
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              background: '#fafafa',
+              background: 'var(--pd-item-bg, #fafafa)',
               userSelect: 'none',
               transition: 'all 0.2s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#e6f4ff';
-              e.currentTarget.style.borderColor = '#1677ff';
+              e.currentTarget.style.background = 'var(--pd-item-hover-bg, #e6f4ff)';
+              e.currentTarget.style.borderColor = 'var(--pd-item-hover-border, #1677ff)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#fafafa';
-              e.currentTarget.style.borderColor = '#d9d9d9';
+              e.currentTarget.style.background = 'var(--pd-item-bg, #fafafa)';
+              e.currentTarget.style.borderColor = 'var(--pd-item-border, #d9d9d9)';
             }}
           >
             {item.icon}

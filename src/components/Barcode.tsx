@@ -36,7 +36,7 @@ const Barcode: React.FC<BarcodeProps> = ({ value, format }) => {
   }, [value, format]);
 
   if (!value) {
-    return <div style={{ fontSize: 11, color: '#999' }}>{t('component.barcodeHint')}</div>;
+    return <div style={{ fontSize: 11, color: 'var(--pd-muted-text, #999)' }}>{t('component.barcodeHint')}</div>;
   }
 
   const barWidth = 2;

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { App as AntApp, Button, Space, Splitter, ConfigProvider } from 'antd';
+import { App as AntApp, Button, Space, Splitter, ConfigProvider, theme as antdTheme } from 'antd';
 import {
   PrinterOutlined,
 } from '@ant-design/icons';
@@ -32,6 +32,10 @@ import printDesignerI18n, {
 } from '../../i18n';
 import { useResolvedLocale } from '../../i18n/useResolvedLocale';
 import { ANTD_LOCALES } from '../../i18n/antdLocale';
+import {
+  useResolvedDarkMode,
+  type PrintDesignerTheme,
+} from './useResolvedTheme';
 
 export interface PrintDesignerProps {
   /** 是否为预览模式（只读） */
@@ -50,6 +54,14 @@ export interface PrintDesignerProps {
    * - `'auto'`：自动跟随宿主应用（宿主 i18next 实例 → `<html lang>` → `navigator.language`）
    * @default 'zh-CN'
    */
+  /**
+   * 界面主题。
+   * - `'light'` / `'dark'`：固定深浅模式；
+   * - `'auto'`：自动跟随宿主应用的暗色状态（宿主 `<html data-erp-dark>` 标记 → 系统 prefers-color-scheme），
+   *   宿主切换主题时实时同步；此时宿主零改动即可跟随。
+   * @default 'auto'
+   */
+  theme?: PrintDesignerTheme;
   locale?: LocaleOption | (string & {});
 }
 
@@ -430,14 +442,14 @@ const PrintDesignerInner: React.FC<PrintDesignerInnerProps> = ({
       <AntApp>
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
           {/* 顶部工具栏 */}
-          <div style={{ padding: '6px 8px', borderBottom: '1px solid #e8e8e8', background: '#fff', textAlign: 'right' }}>
+          <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--pd-chrome-border, #e8e8e8)', background: 'var(--pd-chrome-bg, #fff)', textAlign: 'right' }}>
             <Space>
               <Button type="text" ghost icon={<PrinterOutlined />} onClick={handlePrint}></Button>
             </Space>
           </div>
-          
+
           {/* 预览区域 */}
-          <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '16px', boxSizing: 'border-box', overflowY: 'auto', background: '#e8e8e8' }}>
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '16px', boxSizing: 'border-box', overflowY: 'auto', background: 'var(--pd-canvas-bg, #e8e8e8)' }}>
             <div style={{ flexShrink: 0 }}>
               <Canvas isPreview dataSources={resolvedDataSources} />
             </div>
@@ -557,18 +569,22 @@ const PrintDesignerInner: React.FC<PrintDesignerInnerProps> = ({
 interface LocaleShellProps extends PrintDesignerInnerProps {
   /** 已解析完成的最终语言 */
   locale: Locale;
+  /** 主题设置（'light' | 'dark' | 'auto'），由外层解析为最终暗色布尔值 */
+  theme: PrintDesignerTheme;
 }
 
 /**
- * 语言落地层：把最终语言写到组件库自己的 i18n 实例上，并注入 antd 语言包。
+ * 语言与主题落地层：把最终语言/主题落到组件库自己的 i18n 实例与 ConfigProvider 上。
  *
  * 负责：
  * 1. 同步切换独立 i18n 实例的语言（不污染宿主应用）；
  * 2. 通过 `I18nextProvider` 向内部组件提供翻译能力；
  * 3. 通过 antd `ConfigProvider` 让 antd 内置文案（ColorPicker、Empty、Popconfirm 等）跟随语言；
- * 4. 语言变化后同步默认种子文案（模板名、页眉/页脚/页码格式）。
+ * 4. 根据解析后的深浅模式切换 antd theme algorithm，并在根节点标记 data-pd-dark，
+ *    供 App.css 中的 CSS 变量（--pd-*）切换设计器外壳（工具栏/面板/画布区）配色；
+ * 5. 语言变化后同步默认种子文案（模板名、页眉/页脚/页码格式）。
  */
-const LocaleShell: React.FC<LocaleShellProps> = ({ locale, ...rest }) => {
+const LocaleShell: React.FC<LocaleShellProps> = ({ locale, theme, ...rest }) => {
   // 在子组件渲染前同步切换语言，避免首帧出现默认语言文案
   useMemo(() => {
     if (printDesignerI18n.language !== locale) {
@@ -576,24 +592,41 @@ const LocaleShell: React.FC<LocaleShellProps> = ({ locale, ...rest }) => {
     }
   }, [locale]);
 
+  // 解析最终深浅模式（'auto' 时跟随宿主 data-erp-dark 标记或系统深浅色）
+  const dark = useResolvedDarkMode(theme);
+
   // 语言变化后同步默认种子文案，不影响用户已修改的值
   useEffect(() => {
     useDesignerStore.getState().reseedLocalizedDefaults();
   }, [locale]);
 
   return (
-    <I18nextProvider i18n={printDesignerI18n}>
-      <ConfigProvider locale={ANTD_LOCALES[locale]}>
-        <PrintDesignerInner {...rest} />
-      </ConfigProvider>
-    </I18nextProvider>
+    <div
+      className="pd-theme-root"
+      data-pd-dark={dark ? 'true' : 'false'}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <I18nextProvider i18n={printDesignerI18n}>
+        <ConfigProvider
+          locale={ANTD_LOCALES[locale]}
+          theme={{
+            algorithm: dark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+          }}
+        >
+          <PrintDesignerInner {...rest} />
+        </ConfigProvider>
+      </I18nextProvider>
+    </div>
   );
 };
 
 /** locale="auto"：先探测宿主语言，再交给 LocaleShell 落地 */
-const AutoLocalePrintDesigner: React.FC<PrintDesignerInnerProps> = (rest) => {
+const AutoLocalePrintDesigner: React.FC<PrintDesignerInnerProps> = ({
+  theme = 'auto',
+  ...rest
+}) => {
   const locale = useResolvedLocale('auto');
-  return <LocaleShell locale={locale} {...rest} />;
+  return <LocaleShell locale={locale} theme={theme} {...rest} />;
 };
 
 /**
@@ -605,11 +638,15 @@ const AutoLocalePrintDesigner: React.FC<PrintDesignerInnerProps> = (rest) => {
  *   宿主切换语言时同步切换；此时无需传 `i18n.language`，宿主零改动即可跟随；
  * - 其它语言简写（`'zh'` / `'en'` / `'ja'` / `'zh_CN'` 等）：自动归一化。
  */
-const PrintDesigner: React.FC<PrintDesignerProps> = ({ locale = DEFAULT_LOCALE, ...rest }) =>
+const PrintDesigner: React.FC<PrintDesignerProps> = ({
+  locale = DEFAULT_LOCALE,
+  theme = 'auto',
+  ...rest
+}) =>
   locale === 'auto' ? (
-    <AutoLocalePrintDesigner {...rest} />
+    <AutoLocalePrintDesigner theme={theme} {...rest} />
   ) : (
-    <LocaleShell locale={normalizeLocale(locale)} {...rest} />
+    <LocaleShell locale={normalizeLocale(locale)} theme={theme} {...rest} />
   );
 
 export default PrintDesigner;

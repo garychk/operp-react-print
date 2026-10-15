@@ -12,6 +12,36 @@ html, body, #root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* ===== 主题变量 ===== */
+/* 设计器外壳（工具栏/面板/画布区）配色，默认明亮主题。
+   纸张（#print-paper、打印内容）始终保持白底，不参与主题切换。 */
+.pd-theme-root {
+  --pd-chrome-bg: #ffffff;        /* 工具栏 / 左右面板背景 */
+  --pd-chrome-border: #e8e8e8;    /* 外壳分隔线 */
+  --pd-canvas-bg: #e8e8e8;        /* 画布周围留白区域 */
+  --pd-item-bg: #fafafa;          /* 组件面板条目背景 */
+  --pd-item-border: #d9d9d9;      /* 组件面板条目边框 */
+  --pd-item-hover-bg: #e6f4ff;    /* 组件面板条目悬停背景 */
+  --pd-item-hover-border: #1677ff;/* 组件面板条目悬停边框 */
+  --pd-muted-text: #999999;       /* 弱化提示文字（面板内，非纸张） */
+  --pd-binding-bg: #f0f5ff;       /* 属性面板"已绑定数据源"提示块背景 */
+  --pd-binding-border: #adc6ff;   /* 同上边框 */
+}
+
+/* 暗黑主题：由 LocaleShell 根据解析结果在根节点标记 data-pd-dark */
+.pd-theme-root[data-pd-dark='true'] {
+  --pd-chrome-bg: #141414;
+  --pd-chrome-border: #303030;
+  --pd-canvas-bg: #1f1f1f;
+  --pd-item-bg: #1d1d1d;
+  --pd-item-border: #424242;
+  --pd-item-hover-bg: rgba(22, 119, 255, 0.25);
+  --pd-item-hover-border: #1677ff;
+  --pd-muted-text: #8c8c8c;
+  --pd-binding-bg: rgba(22, 119, 255, 0.16);
+  --pd-binding-border: rgba(22, 119, 255, 0.45);
+}
+
 /* ===== 主容器 ===== */
 .app-container {
   display: flex;
@@ -31,7 +61,7 @@ html, body, #root {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--pd-chrome-bg, #fff);
   overflow: hidden;
 }
 
@@ -49,7 +79,7 @@ html, body, #root {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--pd-chrome-bg, #fff);
   overflow: auto;
 }
 

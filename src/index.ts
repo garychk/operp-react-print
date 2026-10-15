@@ -8,6 +8,9 @@ export { PrintDesigner };
 // 导出类型定义
 export type { PrintDesignerProps } from './components/PrintDesigner';
 
+// 导出主题类型（theme="light" | "dark" | "auto"）
+export type { PrintDesignerTheme } from './components/PrintDesigner/useResolvedTheme';
+
 export type {
   CanvasComponent,
   CanvasComponentType,

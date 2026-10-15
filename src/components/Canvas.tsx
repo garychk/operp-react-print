@@ -358,7 +358,7 @@ const Canvas: React.FC<{ isPreview?: boolean; dataSources?: DataSource[] }> = ({
       style={{
         flex: 1,
         overflow: 'auto',
-        background: '#e8e8e8',
+        background: 'var(--pd-canvas-bg, #e8e8e8)',
         display: 'flex',
         justifyContent: 'center',
         padding: '24px 0',

@@ -91,8 +91,8 @@ const Toolbar: React.FC<ToolbarProps> = ({ onCustomSave, onCustomPrint }) => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 16px',
-        borderBottom: '1px solid #e8e8e8',
-        background: '#fff',
+        borderBottom: '1px solid var(--pd-chrome-border, #e8e8e8)',
+        background: 'var(--pd-chrome-bg, #fff)',
       }}
     >
       <Space>

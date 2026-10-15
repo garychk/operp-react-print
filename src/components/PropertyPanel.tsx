@@ -272,8 +272,8 @@ const PropertyPanel: React.FC = () => {
         ) : (
           <div style={{
             padding: 6,
-            background: '#f0f5ff',
-            border: '1px solid #adc6ff',
+            background: 'var(--pd-binding-bg, #f0f5ff)',
+            border: '1px solid var(--pd-binding-border, #adc6ff)',
             borderRadius: 4,
             fontSize: 12,
           }}>
